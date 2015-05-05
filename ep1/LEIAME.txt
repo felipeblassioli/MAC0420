@@ -1,0 +1,68 @@
+Nome: Felipe Anez de Toledo Blassioli
+NUSP: 7991058
+
+IMPORTANTE: Usei o subdiretorio ../Common com as libs js disponibilizadas.
+
+Opções
+------
+
+* Flat Shading
+
+	O calculo das normais por face esta em calculatePerFaceNormals.
+	Foi usado produto escalar, assim como no codigo de exemplo que 
+	renderizava o cubo
+
+* Smooth Shading (Gouraud)
+
+	Caso nao estejam presentes normais por vertice no arquivo obj,
+	sao calculadas as normais por face (calculatePerFaceNormals)
+	e depois por vertice (calculatePerVertexNormals).
+
+* Preserve AspectRatio 
+
+    Para preservar o aspect-ratio mexi na projectionMatrix.
+    Anteriormente usei uma projecao em perspectiva, mas depois de pesquisar
+    vi que conseguia fazer de modo facil usando a projecao ortografica.
+
+* Center Object :
+
+	Para centralizar o objeto, encontrei a centroid (em loadObjFile).
+	E com esses dados alterei a modelViewMatrix fazendo a translacao para a origem.
+
+* Scale Object :
+	
+	Para escalar corretamente o objeto, encontrei a bouding box (em loadObjFile) e entao
+	para cada ponto da bouding box calculei projectionMatrix * modelViewMatrix para
+	achar o ponto de clipping e ver se ele caia fora do universo.
+
+	Isso pode ser visto em objViewer.calculateScaleFactor().
+
+* Estimate Per-Vertex Normals (Habilitado para o smooth-shading)
+
+	A estimativa das normais dos vertices eh feita pela media das normais das faces adjacentes.
+	Encontrei-as do modo mais ingenuo possivel e isso torna as coisas muito lentas, infelizmente.
+
+Normais
+--------
+
+calculatePerFaceNormals
+
+	As normais dos vertices (que pertencem a um triangulo)
+	sao calculadas usando produto vetorial de dois lados.
+
+calculatePerVertexNormals
+	
+	Dadas as normais por face, a normal de um vertice eh
+	a dada por (n1+n2+n3..) / |n1+n2+n3..|
+	
+Links Consultados
+-----------------
+
+* http://www.songho.ca/opengl/gl_transform.html
+* http://www.opengl-tutorial.org/beginners-tutorials/tutorial-3-matrices/
+* http://www.opengl-tutorial.org/beginners-tutorials/tutorial-7-model-loading/
+
+## Outros
+
+* http://www.cg.info.hiroshima-cu.ac.jp/~miyazaki/knowledge/teche23.html (testei transformar as normais com uma lib ja pronta que invertia matrizes com math.inv(array) )
+* https://www3.ntu.edu.sg/home/ehchua/programming/opengl/CG_BasicsTheory.html
