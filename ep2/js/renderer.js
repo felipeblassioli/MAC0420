@@ -15,7 +15,7 @@ var Renderer = function(){
 
 Renderer.prototype.init = function(canvas){
 	console.log("renderer.init()");
-
+	this.canvas = canvas;
 	this.initGL(canvas);
 	this.initShaders();
 }
@@ -89,18 +89,34 @@ Renderer.prototype.render = function(){
 	//console.log("Render!");
 	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-	var modelViewMatrixLoc = this.gl.getUniformLocation(this.currentProgram, "modelViewMatrix");
-	var projectionMatrixLoc = this.gl.getUniformLocation(this.currentProgram, "projectionMatrix");
-    
-	this.gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( this.getModelViewMatrix() ) );
-	this.gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( this.getProjectionMatrix() ) );
-
 	for (i = 0; i < this.loadedObjects.length; i++)
-		this.loadedObjects[i].render( this.gl, this.currentProgram );
+		this.loadedObjects[i].render( this.gl, this.currentProgram, this.canvas );
+}
+
+Renderer.prototype.resizeIfNeeded = function(){
+	// Get the canvas from the WebGL context
+	var canvas = this.gl.canvas;
+	 
+	// Lookup the size the browser is displaying the canvas.
+	var displayWidth = canvas.clientWidth;
+	var displayHeight = canvas.clientHeight;
+	 
+	// Check if the canvas is not the same size.
+	if (canvas.width != displayWidth ||
+		canvas.height != displayHeight) {
+		 
+		// Make the canvas the same size
+		canvas.width = displayWidth;
+		canvas.height = displayHeight;
+		 
+		// Set the viewport to match
+		this.gl.viewport(0, 0, canvas.width, canvas.height);
+	}
 }
 
 Renderer.prototype.tick = function(){
 	//console.log("tick: "+this.getName());
+	this.resizeIfNeeded();
 	this.render();
 
 	if(this.is_drawing) {
@@ -111,6 +127,9 @@ Renderer.prototype.tick = function(){
 }
 
 Renderer.prototype.getProjectionMatrix = function(){
+
+	/*We’re now in Camera Space. This means that after all theses transformations, a vertex that happens to have x==0 and y==0 should be rendered at the center of the screen. But we can’t use only the x and y coordinates to determine where an object should be put on the screen : its distance to the camera (z) counts, too ! For two vertices with similar x and y coordinates, the vertex with the biggest z coordinate will be more on the center of the screen than the other.
+	*/
 	var aspect = canvas.clientWidth/Math.max(1, canvas.clientHeight);
 
 /*	var xleft = -1.0;
@@ -126,12 +145,23 @@ Renderer.prototype.getProjectionMatrix = function(){
 	var near = -1.0;
 	var far = 1.0;
 	var fovy = 45.0;
+	/*// Generates a really hard-to-read matrix, but a normal, standard 4x4 matrix nonetheless
+	glm::mat4 projectionMatrix = glm::perspective(
+	    FoV,         // The horizontal Field of View, in degrees : the amount of "zoom". Think "camera lens". Usually between 90° (extra wide) and 30° (quite zoomed in)
+	    4.0f / 3.0f, // Aspect Ratio. Depends on the size of your window. Notice that 4/3 == 800/600 == 1280/960, sounds familiar ?
+	    0.1f,        // Near clipping plane. Keep as big as possible, or you'll get precision issues.
+	    100.0f       // Far clipping plane. Keep as little as possible.
+	);*/
+/*
+We went from Camera Space (all vertices defined relatively to the camera) to Homogeneous Space 
+(all vertices defined in a small cube. Everything inside the cube is onscreen).*/
 	return perspective(fovy, 1/aspect, near, far);
 }
 
 Renderer.prototype.getModelViewMatrix = function(){
-	var eye = vec3(1.0, 0.0, 0.0);
-	var at = vec3(0.0, 0.0, 0.0);
-	var up = vec3(0.0, 1.0, 0.0);
+	var eye = vec3(1.0, 0.0, 0.0);// the position of your camera, in world space
+	var at = vec3(0.0, 0.0, 0.0); // where you want to look at, in world space
+	var up = vec3(0.0, 1.0, 0.0);  // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
+
 	return lookAt(eye,at,up);
 }

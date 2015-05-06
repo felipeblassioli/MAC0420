@@ -299,7 +299,14 @@ var render = function() {
                 [0, 0, 0, 1 ]  )
         );
     }
+/*
+    TransformedVector = TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector;
+    !!! BEWARE !!! This lines actually performs the scaling FIRST, and THEN the rotation, and THEN the translation. This is how matrix multiplication works.*/
+    /*translation*rotation*scale*/
 
+/*/ C++ : compute the matrix
+glm::mat4 MVPmatrix = projection * view * model; // Remember : inverted !
+*/
     if(options.center_object){
         modelViewMatrix = mult(
             modelViewMatrix,

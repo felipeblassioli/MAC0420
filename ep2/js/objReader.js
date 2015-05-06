@@ -1,15 +1,21 @@
-var Model = function(vertices, normals, centroid){
+var Model = function(vertices, normals, centroid, bbox){
 	this.vertices = vertices || [];
 	this.normals = normals || [];
 	this.centroid = centroid;
+	this.bbox = bbox;
+	this.radius = this.getBoundingSphereRadius();
 }
 
-var SHADING_MODE = {
-    GOURAUD: 'smooth-shading-gouraud',
-    FLAT: 'flat-shading'
+Model.prototype.getBoundingSphereRadius = function(){
+	var d = Math.sqrt(
+		Math.pow( this.bbox.right[0] - this.bbox.left[0], 2 )
+		+ Math.pow( this.bbox.top[1] - this.bbox.bottom[1], 2 )
+		+ Math.pow( this.bbox.far[2] - this.bbox.near[2], 2 )
+	);
+	return d/2;
 }
 
-Model.prototype.render = function(gl, program){
+Model.prototype.render = function(gl, program, canvas){
 	var nBuffer = gl.createBuffer();
 	gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
 	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.normals), gl.STATIC_DRAW );
@@ -26,8 +32,73 @@ Model.prototype.render = function(gl, program){
 	gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(vPosition);
 
+	var modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
+	var projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
+    
+	gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( this.getModelViewMatrix() ) );
+	gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( this.getProjectionMatrix(canvas) ) );
+
 	gl.drawArrays( gl.TRIANGLES, 0, this.vertices.length );
 }
+
+Model.prototype.getProjectionMatrix = function(canvas){
+	var aspect = canvas.clientWidth/Math.max(1, canvas.clientHeight);
+/*	var near = -1.0;
+	var far = 1.0;
+	var fovy = 45.0;
+
+
+	return perspective(fovy, 1/aspect, near, far);*/
+	var xleft = -1.0;
+	var xright = 1.0;
+	var ybottom = -1.0;
+	var ytop = 1.0;
+	var znear = -1.0;
+	var zfar = 1.0;
+
+	// Preserve Aspect Ratio
+	return ortho(xleft, xright,ybottom/aspect, ytop/aspect, znear,zfar);
+
+}
+
+Model.prototype.getModelViewMatrix = function(){
+	var eye = vec3(1.0, 0.0, 0.0);// the position of your camera, in world space
+	var at = vec3(0.0, 0.0, 0.0); // where you want to look at, in world space
+	var up = vec3(0.0, 1.0, 0.0);  // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
+
+	/* View */
+	var modelViewMatrix = lookAt(eye,at,up);
+
+	/* modelMatrix = TranslationMatrix * RotationMatrix * ScaleMatrix */
+
+/*	modelViewMatrix = mult(
+		modelViewMatrix,
+		mat4(
+			[1, 0, 0, -this.centroid[0]/2 ],
+			[0, 1, 0, -this.centroid[1]/2 ],
+			[0, 0, 1, -this.centroid[2]/2 ],
+			[0, 0, 0, 1 ]  )
+	);
+*/
+	var s = 0.2;
+	modelViewMatrix = mult(
+		modelViewMatrix,
+		mat4(
+			[s, 0, 0, 0 ],
+			[0, s, 0, 0 ],
+			[0, 0, s, 0 ],
+			[0, 0, 0, 1 ]  )
+	);
+
+	return modelViewMatrix;
+}
+
+
+var SHADING_MODE = {
+    GOURAUD: 'smooth-shading-gouraud',
+    FLAT: 'flat-shading'
+}
+
 
 function ObjectReader(){
 	var parseObj = function(data){
@@ -206,25 +277,25 @@ function ObjectReader(){
 
 				if(result.bounds == null){
 					result.bounds = {
-						left: vertex[0],
-						right: vertex[0],
-						top: vertex[1],
-						bottom: vertex[1],
-						near: vertex[2],
-						far: vertex[2]
+						left: vertex,
+						right: vertex,
+						top: vertex,
+						bottom: vertex,
+						near: vertex,
+						far: vertex
 					};
 				}else{
-					if(vertex[0] < result.bounds.left)
+					if(vertex[0] < result.bounds.left[0])
 						result.bounds.left = vertex;
-					if(vertex[0] > result.bounds.right)
+					if(vertex[0] > result.bounds.right[0])
 						result.bounds.right = vertex;
-					if(vertex[1] < result.bounds.bottom)
+					if(vertex[1] < result.bounds.bottom[1])
 						result.bounds.bottom = vertex;
-					if(vertex[1] > result.bounds.top)
+					if(vertex[1] > result.bounds.top[1])
 						result.bounds.top = vertex;
-					if(vertex[2] < result.bounds.near)
+					if(vertex[2] < result.bounds.near[2])
 						result.bounds.near = vertex;
-					if(vertex[2] > result.bounds.far)
+					if(vertex[2] > result.bounds.far[2])
 						result.bounds.far = vertex;
 				}
 
@@ -269,7 +340,7 @@ function ObjectReader(){
 		console.log('normals count '+result.normals.length);
 		
 		// (iii) Return vertices and normals and any associated information you might find useful
-		var model = new Model(result.vertices, result.normals, result.centroid);
+		var model = new Model(result.vertices, result.normals, result.centroid, result.bounds);
 		return model;
 	};
 
@@ -277,4 +348,3 @@ function ObjectReader(){
 		loadObjFile: loadObjFile
 	}
 }
-
