@@ -111,7 +111,9 @@ Renderer.prototype.tick = function(){
 }
 
 Renderer.prototype.getProjectionMatrix = function(){
-	var xleft = -1.0;
+	var aspect = canvas.clientWidth/Math.max(1, canvas.clientHeight);
+
+/*	var xleft = -1.0;
 	var xright = 1.0;
 	var ybottom = -1.0;
 	var ytop = 1.0;
@@ -119,8 +121,12 @@ Renderer.prototype.getProjectionMatrix = function(){
 	var zfar = 1.0;
 
 	// Preserve Aspect Ratio
-	var aspect = canvas.clientWidth/Math.max(1, canvas.clientHeight);
 	return ortho(xleft, xright,ybottom/aspect, ytop/aspect, znear,zfar);
+*/
+	var near = -1.0;
+	var far = 1.0;
+	var fovy = 45.0;
+	return perspective(fovy, 1/aspect, near, far);
 }
 
 Renderer.prototype.getModelViewMatrix = function(){
