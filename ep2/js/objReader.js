@@ -1,3 +1,34 @@
+var Model = function(vertices, normals, centroid){
+	this.vertices = vertices || [];
+	this.normals = normals || [];
+	this.centroid = centroid;
+}
+
+var SHADING_MODE = {
+    GOURAUD: 'smooth-shading-gouraud',
+    FLAT: 'flat-shading'
+}
+
+Model.prototype.render = function(gl, program){
+	var nBuffer = gl.createBuffer();
+	gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
+	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.normals), gl.STATIC_DRAW );
+
+	var vNormal = gl.getAttribLocation( program, "vNormal" );
+	gl.vertexAttribPointer( vNormal, 4, gl.FLOAT, false, 0, 0 );
+	gl.enableVertexAttribArray( vNormal );
+
+	var vBuffer = gl.createBuffer();
+	gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
+	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.vertices), gl.STATIC_DRAW );
+
+	var vPosition = gl.getAttribLocation(program, "vPosition");
+	gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(vPosition);
+
+	gl.drawArrays( gl.TRIANGLES, 0, this.vertices.length );
+}
+
 function ObjectReader(){
 	var parseObj = function(data){
 		var result = {};
@@ -144,7 +175,8 @@ function ObjectReader(){
 		return perVertexNormals;
 	};
 
-	var loadObjFile = function(data) {
+	var loadObjFile = function(data, mode) {
+		var shading_mode = mode || SHADING_MODE.FLAT;
 		var result, tmp, vertexIndex, normalIndex, vertex, normal;
 		var boundingBox = {};
 
@@ -235,8 +267,10 @@ function ObjectReader(){
 		
 		console.log('vertices count '+result.vertices.length);
 		console.log('normals count '+result.normals.length);
+		
 		// (iii) Return vertices and normals and any associated information you might find useful
-		return result;
+		var model = new Model(result.vertices, result.normals, result.centroid);
+		return model;
 	};
 
 	return {

@@ -30,7 +30,6 @@ uniform float shininess;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
-uniform mat4 normalMatrix;
 
 uniform vec4 lightPosition;
 
@@ -46,7 +45,7 @@ void main()
     vec3 H = normalize( L + E );
 
     // transform vertex normal into eye coordinates
-    vec3 N = normalize( (normalMatrix * vNormal).xyz );
+    vec3 N = normalize( (modelViewMatrix * vNormal).xyz );
 
     // compute terms in the illumination equation
     vec4 ambient = ambientProduct;

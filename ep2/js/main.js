@@ -6,6 +6,7 @@ app.init = function(){
 	canvas = document.getElementById( "gl-canvas" );
 	app.UI.init();
 	app.renderer.init(canvas);
+	app.renderer.start();
 }
 
 app.UI = {
