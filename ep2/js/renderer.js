@@ -85,8 +85,6 @@ Renderer.prototype.initShaders = function (){
 
 }
 
-
-
 Renderer.prototype.render = function(){
 	//console.log("Render!");
 	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
@@ -117,9 +115,12 @@ Renderer.prototype.getProjectionMatrix = function(){
 	var xright = 1.0;
 	var ybottom = -1.0;
 	var ytop = 1.0;
-	var znear = -100.0;
-	var zfar = 100.0;
-	return ortho(xleft, xright, ybottom, ytop, znear, zfar);
+	var znear = -1.0;
+	var zfar = 1.0;
+
+	// Preserve Aspect Ratio
+	var aspect = canvas.clientWidth/Math.max(1, canvas.clientHeight);
+	return ortho(xleft, xright,ybottom/aspect, ytop/aspect, znear,zfar);
 }
 
 Renderer.prototype.getModelViewMatrix = function(){
