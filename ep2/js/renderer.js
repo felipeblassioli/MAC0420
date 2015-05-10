@@ -100,12 +100,15 @@ Renderer.prototype.render = function(){
 	//this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
+	var viewMatrix = this.getViewMatrix();
+	var projectionMatrix = this.getProjectionMatrix();
+
 	for (i = 0; i < this.loadedObjects.length; i++){
 		this.activateProgram( this.programs.model );
-		this.loadedObjects[i].render( this.gl, this.currentProgram, this.canvas );
+		this.loadedObjects[i].render( this.gl, this.currentProgram, viewMatrix, projectionMatrix );
 
 		this.activateProgram( this.programs.wireframe );
-		this.loadedObjects[i].bbox.render( this.gl, this.currentProgram, this.canvas );
+		this.loadedObjects[i].bbox.render( this.gl, this.currentProgram, viewMatrix, projectionMatrix );
 	}
 }
 
@@ -150,44 +153,43 @@ Renderer.prototype.tick = function(){
 	}
 }
 
-Renderer.prototype.getProjectionMatrix = function(){
-
-	/*We’re now in Camera Space. This means that after all theses transformations, a vertex that happens to have x==0 and y==0 should be rendered at the center of the screen. But we can’t use only the x and y coordinates to determine where an object should be put on the screen : its distance to the camera (z) counts, too ! For two vertices with similar x and y coordinates, the vertex with the biggest z coordinate will be more on the center of the screen than the other.
-	*/
-	var aspect = canvas.clientWidth/Math.max(1, canvas.clientHeight);
-
-/*	var xleft = -1.0;
-	var xright = 1.0;
-	var ybottom = -1.0;
-	var ytop = 1.0;
-	var znear = -1.0;
-	var zfar = 1.0;
-
-	// Preserve Aspect Ratio
-	return ortho(xleft, xright,ybottom/aspect, ytop/aspect, znear,zfar);
-*/
-	var near = -1.0;
-	var far = 1.0;
-	var fovy = 45.0;
-	/*// Generates a really hard-to-read matrix, but a normal, standard 4x4 matrix nonetheless
-	glm::mat4 projectionMatrix = glm::perspective(
-	    FoV,         // The horizontal Field of View, in degrees : the amount of "zoom". Think "camera lens". Usually between 90° (extra wide) and 30° (quite zoomed in)
-	    4.0f / 3.0f, // Aspect Ratio. Depends on the size of your window. Notice that 4/3 == 800/600 == 1280/960, sounds familiar ?
-	    0.1f,        // Near clipping plane. Keep as big as possible, or you'll get precision issues.
-	    100.0f       // Far clipping plane. Keep as little as possible.
-	);*/
-/*
-We went from Camera Space (all vertices defined relatively to the camera) to Homogeneous Space 
-(all vertices defined in a small cube. Everything inside the cube is onscreen).*/
-	return perspective(fovy, 1/aspect, near, far);
+function _perspective( left, right, bottom, top, near, far ){
+    return mat4(
+        vec4( (2*near)/(right-left), 0, (right+left)/(right-left), 0 ),
+        vec4( 0, (2*near)/(top-bottom), (top+bottom)/(top-bottom), 0 ),
+        vec4( 0, 0, -(far+near)/(far-near), (-2*far*near)/(far-near) ),
+        vec4( 0, 0, -1, 0)
+    );
 }
 
-Renderer.prototype.getModelViewMatrix = function(){
-	var eye = vec3(1.0, 0.0, 0.0);// the position of your camera, in world space
+function _makeFrustrum(fovY, aspectRatio, front, back){
+    var DEG2RAD = 3.14159265 / 180;
+    var tangent = Math.tan(fovY/2*DEG2RAD);
+    var height = front * tangent;
+    var width = height * aspectRatio;
+
+    return _perspective(-width,width, -height, height, front, back);
+}
+
+Renderer.prototype.getProjectionMatrix = function(){
+	var canvas = this.canvas;
+	var aspect = canvas.clientWidth/Math.max(1, canvas.clientHeight);
+	var near = 3.0;
+	var far = 7.0;
+	var fovy = 45.0;
+
+	return _makeFrustrum(fovy, aspect, near, far);
+
+}
+
+Renderer.prototype.getViewMatrix = function(){
+	var eye = vec3(0.5, 1.25, -5.5);// the position of your camera, in world space
 	var at = vec3(0.0, 0.0, 0.0); // where you want to look at, in world space
 	var up = vec3(0.0, 1.0, 0.0);  // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
 
-	return lookAt(eye,at,up);
+	var viewMatrix = lookAt(eye,at,up);
+
+	return viewMatrix;
 }
 
 Renderer.prototype.unproject = function(viewport_x, viewport_y){
@@ -216,7 +218,7 @@ Renderer.prototype.unproject = function(viewport_x, viewport_y){
 	// don't forget to normalise the vector at some point
 	ray_wor = normalise (ray_wor);*/
 
-	vec3 ray_wor = (inverse (view_matrix) * ray_eye).xyz; // don't forget to normalise the vector at some point ray_wor = normalise (ray_wor);
+	//vec3 ray_wor = (inverse (view_matrix) * ray_eye).xyz; // don't forget to normalise the vector at some point ray_wor = normalise (ray_wor);
 /*
 This should balance the up-and-down, left-and-right, and forwards components for us. So, assuming our camera is looking directly along the -Z world axis, we should get [0,0,-1] when the mouse is in the centre of the screen, and less significant z values when the mouse moves around the screen. This will depend on the aspect ratio, and field-of-view defined in the view and projection matrices. We now have a ray that we can compare with surfaces in world space. */
 }
