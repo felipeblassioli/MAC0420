@@ -209,4 +209,14 @@ Renderer.prototype.unproject = function(viewport_x, viewport_y){
 	console.log("ray_clip: "+ray_clip);
 	/* Homogeneus Coordinates to Eye Coordinates */
 	//var ray_eye = 
+	//vec4 ray_eye = inverse (projection_matrix) * ray_clip;
+	//ray_eye = vec4 (ray_eye.xy, -1.0, 0.0);
+
+/*	vec3 ray_wor = (inverse (view_matrix) * ray_eye).xyz;
+	// don't forget to normalise the vector at some point
+	ray_wor = normalise (ray_wor);*/
+
+	vec3 ray_wor = (inverse (view_matrix) * ray_eye).xyz; // don't forget to normalise the vector at some point ray_wor = normalise (ray_wor);
+/*
+This should balance the up-and-down, left-and-right, and forwards components for us. So, assuming our camera is looking directly along the -Z world axis, we should get [0,0,-1] when the mouse is in the centre of the screen, and less significant z values when the mouse moves around the screen. This will depend on the aspect ratio, and field-of-view defined in the view and projection matrices. We now have a ray that we can compare with surfaces in world space. */
 }

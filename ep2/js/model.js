@@ -162,14 +162,13 @@ var BoundingBox = function(bbox){
 	this.near = bbox.near;
 	this.far = bbox.far;
 
-	//this.near[2] = -1 * this.near[2];
-	this.bottom[1] -= 0.1;
+/*	this.bottom[1] -= 0.1;
 	this.top[1] += 0.1;
 	this.left[0] -= 0.1;
 	this.right[0] += 0.1;
 	this.near[2] -= 0.1;
 	this.far[2] += 0.1;
-
+*/
 	this.center = vec3(
 		(bbox.right[0] - bbox.left[0])/2.0,
 		(bbox.top[1] - bbox.bottom[1])/2.0,
@@ -254,4 +253,8 @@ BoundingBox.prototype.getWireFrame = function(){
 		vertices: vertices,
 		normals: normals
 	};
+}
+
+BoundingBox.prototype.intersect = function(ray){
+	
 }
