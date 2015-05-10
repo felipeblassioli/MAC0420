@@ -67,7 +67,7 @@ Model.prototype.render = function(gl, program, canvas){
 
 	gl.drawArrays( gl.TRIANGLES, 0, this.vertices.length );
 
-	this.bbox.render(gl, program, canvas);
+	//this.bbox.render(gl, program, canvas);
 }
 
 Model.prototype.getModelViewMatrix = function(){
@@ -182,14 +182,14 @@ var BoundingBox = function(bbox){
 BoundingBox.prototype = Object.create(Model.prototype);
 BoundingBox.prototype.constructor = BoundingBox;
 BoundingBox.prototype.render = function(gl, program, canvas){
-	var nBuffer = gl.createBuffer();
+/*	var nBuffer = gl.createBuffer();
 	gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
 	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.wireframe.normals), gl.STATIC_DRAW );
 
 	var vNormal = gl.getAttribLocation( program, "vNormal" );
 	gl.vertexAttribPointer( vNormal, 4, gl.FLOAT, false, 0, 0 );
 	gl.enableVertexAttribArray( vNormal );
-
+*/
 	var vBuffer = gl.createBuffer();
 	gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
 	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.wireframe.vertices), gl.STATIC_DRAW );

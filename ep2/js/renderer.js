@@ -11,6 +11,7 @@ var Renderer = function(){
 	this.currentProgram = null;
 	this.loadedObjects = [];
 	this.reader = new ObjectReader();
+	this.programs = {};
 }
 
 Renderer.prototype.init = function(canvas){
@@ -55,34 +56,43 @@ Renderer.prototype.initGL = function (canvas){
 	// enable depth testing for hidden surface removal
 	this.gl.enable(this.gl.DEPTH_TEST);
 }
- 
+
 Renderer.prototype.initShaders = function (){
 	console.log("renderer.initShaders()");
-	//TODO: dynamic load shader files
-	this.currentProgram = initShaders(this.gl, "flat-vs", "flat-fs");
-	this.gl.useProgram(this.currentProgram);
+	this.programs.model = initShaders(this.gl, "flat-vs", "flat-fs");
+	this.programs.model.init = function(gl){
+		// create light components
+		var lightPosition = vec4( 0.5, 1.25, -15.5, 0.0 );
+		var lightAmbient = vec4( 0.2, 0.2, 0.2, 1.0 );
+		var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+		var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
-	// create light components
-	var lightPosition = vec4( 10.0, 10.0, 10.0, 0.0 );
-	var lightAmbient = vec4( 0.2, 0.2, 0.2, 1.0 );
-	var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
-	var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+		var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
+		var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0);
+		var materialSpecular = vec4( 1.0, 0.8, 0.0, 1.0 );
+		var materialShininess = 100.0;
+		var ambientProduct = mult(lightAmbient, materialAmbient);
+	    var diffuseProduct = mult(lightDiffuse, materialDiffuse);
+	    var specularProduct = mult(lightSpecular, materialSpecular);
 
-	var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
-	var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0);
-	var materialSpecular = vec4( 1.0, 0.8, 0.0, 1.0 );
-	var materialShininess = 100.0;
-	var ambientProduct = mult(lightAmbient, materialAmbient);
-    var diffuseProduct = mult(lightDiffuse, materialDiffuse);
-    var specularProduct = mult(lightSpecular, materialSpecular);
+		gl.uniform4fv( gl.getUniformLocation(this, "ambientProduct"), flatten(ambientProduct) );
+		gl.uniform4fv( gl.getUniformLocation(this, "diffuseProduct"), flatten(diffuseProduct) );
+		gl.uniform4fv( gl.getUniformLocation(this, "specularProduct"), flatten(specularProduct) );  
+		gl.uniform4fv( gl.getUniformLocation(this, "lightPosition"), flatten(lightPosition) );
 
-	this.gl.uniform4fv( this.gl.getUniformLocation(this.currentProgram, "ambientProduct"), flatten(ambientProduct) );
-	this.gl.uniform4fv( this.gl.getUniformLocation(this.currentProgram, "diffuseProduct"), flatten(diffuseProduct) );
-	this.gl.uniform4fv( this.gl.getUniformLocation(this.currentProgram, "specularProduct"), flatten(specularProduct) );  
-	this.gl.uniform4fv( this.gl.getUniformLocation(this.currentProgram, "lightPosition"), flatten(lightPosition) );
+		gl.uniform1f( gl.getUniformLocation(this, "shininess"), materialShininess );
 
-	this.gl.uniform1f( this.gl.getUniformLocation(this.currentProgram, "shininess"), materialShininess );
+	};
+	
+	this.programs.wireframe = initShaders(this.gl, "wireframe-vs", "wireframe-fs");
+	this.activateProgram(this.programs.model);
+}
 
+Renderer.prototype.activateProgram = function(program){
+	this.currentProgram = program;
+	this.gl.useProgram(program);
+	if(program.init)
+		program.init(this.gl);
 }
 
 Renderer.prototype.render = function(){
@@ -90,8 +100,13 @@ Renderer.prototype.render = function(){
 	//this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-	for (i = 0; i < this.loadedObjects.length; i++)
+	for (i = 0; i < this.loadedObjects.length; i++){
+		this.activateProgram( this.programs.model );
 		this.loadedObjects[i].render( this.gl, this.currentProgram, this.canvas );
+
+		this.activateProgram( this.programs.wireframe );
+		this.loadedObjects[i].bbox.render( this.gl, this.currentProgram, this.canvas );
+	}
 }
 
 Renderer.prototype.resizeIfNeeded = function(){

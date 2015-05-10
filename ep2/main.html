@@ -80,7 +80,7 @@ void main()
 }
 </script>
 
-<script id="vertex-shader" type="x-shader/x-vertex">
+<script id="wireframe-vs" type="x-shader/x-vertex">
 attribute vec4 vPosition;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
@@ -90,13 +90,13 @@ void main(){
 }
 </script>
 
-<script id="fragment-shader" type="x-shader/x-fragment">
+<script id="wireframe-fs" type="x-shader/x-fragment">
 precision mediump float;
 
 void
 main()
 {
-    gl_FragColor = vec4( 1.0, 1.0, 0.0, 1.0 );
+    gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
 }
 </script>
 
