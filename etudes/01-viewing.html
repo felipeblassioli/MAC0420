@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Simple OBJ Viewer</title>
+
+    <style type="text/css">
+        
+    </style>
+</head>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+
+void main(){
+    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+
+void
+main()
+{
+    gl_FragColor = vec4( 1.0, 1.0, 0.0, 1.0 );
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+
+<script type="text/javascript">
+
+var gl;
+var program;
+var canvas;
+var modelViewMatrixLoc;
+var projectionMatrixLoc;
+
+var modelViewMatrix;
+var projectionMatrix;
+var vertices = [];
+
+function initGL(){
+
+    gl = WebGLUtils.setupWebGL( canvas );
+    if ( !gl ) { alert( "WebGL isn't available" ); }
+
+    // create viewport and clear color
+    gl.viewport( 0, 0, canvas.width, canvas.height );
+
+    gl.clearColor( 0.5, 0.5, 0.5, 1.0 );
+
+    // enable depth testing for hidden surface removal
+    gl.enable(this.gl.DEPTH_TEST);
+
+    program = initShaders(gl, "vertex-shader", "fragment-shader");
+    gl.useProgram(program);
+
+    /*modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
+    projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
+    */
+}
+
+function _lookAt(e,g,t){
+    var w = -normalize(g);
+    var u = normalize( cross(t,w) );
+    var v = cross(w,u);
+
+    var alignMatrix = mat4(
+        [ u[0], u[1], u[2], 0],
+        [ v[0], v[1], v[2], 0],
+        [ w[0], w[1], w[2], 0],
+        [ 0, 0, 0, 1]
+    );
+    var translateMatrix = mat4(
+        [ 1, 0, 0, -e[0] ],
+        [ 0, 1, 0, -e[1] ],
+        [ 0, 0, 1, -e[2] ]
+    );
+    var viewMatrix = mult(alignMatrix, translateMatrix);
+    return viewMatrix;
+}
+
+
+// This creates a symmetric frustum.
+// It converts to 6 params (l, r, b, t, n, f) for glFrustum()
+// from given 4 params (fovy, aspect, near, far)
+/*void makeFrustum(double fovY, double aspectRatio, double front, double back)
+{
+    const double DEG2RAD = 3.14159265 / 180;
+
+    double tangent = tan(fovY/2 * DEG2RAD);   // tangent of half fovY
+    double height = front * tangent;          // half height of near plane
+    double width = height * aspectRatio;      // half width of near plane
+
+    // params: left, right, bottom, top, near, far
+    glFrustum(-width, width, -height, height, front, back);
+}*/
+
+function _perspective( left, right, bottom, top, near, far ){
+    return mat4(
+        vec4( (2*near)/(right-left), 0, (right+left)/(right-left), 0 ),
+        vec4( 0, (2*near)/(top-bottom), (top+bottom)/(top-bottom), 0 ),
+        vec4( 0, 0, -(far+near)/(far-near), (-2*far*near)/(far-near) ),
+        vec4( 0, 0, -1, 0)
+    );
+}
+
+function _makeFrustrum(fovY, aspectRatio, front, back){
+    var DEG2RAD = 3.14159265 / 180;
+    var tangent = Math.tan(fovY/2*DEG2RAD);
+    var height = front * tangent;
+    var width = height * aspectRatio;
+
+    return _perspective(-width,width, -height, height, front, back);
+}
+
+
+function render(){
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    /*var nBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(this.normals), gl.STATIC_DRAW );
+
+    var vNormal = gl.getAttribLocation( program, "vNormal" );
+    gl.vertexAttribPointer( vNormal, 4, gl.FLOAT, false, 0, 0 );
+    gl.enableVertexAttribArray( vNormal );
+    */
+
+    var vBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
+
+    var vPosition = gl.getAttribLocation(program, "vPosition");
+    gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
+
+
+    var eye = vec3(0.0, 0.0, -4.0);// the position of your camera, in world space
+    var at = vec3(0.0, 0.0, 0.0); // where you want to look at, in world space
+    var up = vec3(0.0, 1.0, 0.0);  // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
+
+    modelViewMatrix = lookAt(eye,at,up);
+    //var modelViewMatrix2 = _lookAt(eye,at,up); 
+    var xleft = -1.0;
+    var xright = 1.0;
+    var ybottom = -1.0;
+    var ytop = 0.0;
+    var znear = 1.0;
+    var zfar = 7.0;
+
+    // Preserve Aspect Ratio
+    projectionMatrix = ortho(xleft, xright,ybottom, ytop, znear,zfar);
+    var x = _perspective(xleft, xright,ybottom, ytop, znear,zfar);
+    var aspect = canvas.clientWidth/Math.max(1, canvas.clientHeight);
+    var near = 3;
+    var far = 7;
+    var fovy = 30.0;
+
+    var y = _makeFrustrum(fovy, aspect, near, far);
+    projectionMatrix = perspective(fovy, aspect, near, far);
+
+/*    modelViewMatrix = mat4(
+        [1,0,0,0],
+        [0,1,0,0],
+        [0,0,1,0],
+        [0,0,0,1]
+    );*/
+    /*projectionMatrix = mat4(
+        [1,0,0,0],
+        [0,1,0,0],
+        [0,0,1,0],
+        [0,0,0,1]
+    );*/
+    console.log("ModelView:");
+    for(var i=0; i<modelViewMatrix.length; i++)
+        console.log(modelViewMatrix[i]);
+    console.log("projectionMatrix");
+    for(var i=0; i<projectionMatrix.length; i++)
+        console.log(projectionMatrix[i]);
+       /* for(var j=0; j<projectionMatrix[i].length; j++)
+            console.log(projectionMatrix[i][j]);*/
+    //console.log(projectionMatrix);
+    modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
+    projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
+    
+    gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( modelViewMatrix ) );
+    gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( projectionMatrix ) );
+
+    gl.drawArrays( gl.LINES, 0, vertices.length );
+}
+
+window.onload = function(){
+    canvas = document.getElementById("gl-canvas");
+    initGL();
+
+    vertices.push( vec4( -1, -1, 0.5 ) );
+    //vertices.push( vec4( 1, -1, 0.5 ) );
+    //vertices.push( vec4( 1, -1, 0.5 ) );
+    vertices.push( vec4( 0, 1, 0.5 ) );
+
+
+/*    vertices.push( vec4( -2, -2,  0.9 ) );
+    vertices.push( vec4( 2, -2, 0.9 ) );
+    vertices.push( vec4( 0, 2, 0.9 ) );*/
+/*    vertices.push( vec3( 0,0,0 ) );
+    vertices.push( vec3( 1,0,0 ) );
+    vertices.push( vec3( 0,1,0 ) );
+
+    vertices.push( vec3( 1,1,0 ) );
+    vertices.push( vec3( 1,0,0 ) );
+    vertices.push( vec3( 0,1,0 ) );
+*/
+    /*
+    vertices.push( vec3( 1,1,0 ) );
+    vertices.push( vec3( 1,0,0 ) );
+    vertices.push( vec3( 0,1,0 ) );
+*/
+
+    render();
+};
+
+</script>
+
+
+<body>
+    <canvas id="gl-canvas" width="512" height="512">
+                Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+</body>
+</html>

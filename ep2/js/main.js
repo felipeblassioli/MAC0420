@@ -13,6 +13,7 @@ app.UI = {
 	init: function(){
 		console.log("app.UI.init()");
 		document.getElementById('files').onchange = app.UI.onFilesChange;
+		document.getElementById('gl-canvas').onclick = app.UI.onCanvasClick;
 	},
 
 	onFilesChange: function(evt){
@@ -32,6 +33,38 @@ app.UI = {
 		} else { 
 		    alert("Failed to load file");
 		}
+	},
+
+	onCanvasClick: function(evt){
+		var elemLeft = document.getElementById('gl-canvas').offsetLeft;
+		var elemTop = document.getElementById('gl-canvas').offsetTop;
+
+		var x = evt.pageX - elemLeft;
+		var y = evt.pageY - elemTop;
+
+		console.log("canvas ("+x+", "+y+")");
+
+		var ray = app.renderer.unproject(x,y);
+		console.log("Ray:");
+		console.log(ray);
+		// Collision detection between clicked offset and element.
+		/*elements.forEach(function(element) {
+		if (y > element.top && y < element.top + element.height 
+		&& x > element.left && x < element.left + element.width) {
+		alert('clicked an element');
+		}
+		});*/
+/*https://github.com/sinisterchipmunk/jax/blob/d544efe78691593743ee72956ca6b670d013d37e/doc/input/using-mouse-to-interact-with-models.coffee*/
+/*@mouse_pressed = (e) ->
+ray = @activeCamera.unproject e.x, e.y
+direction = vec3.subtract [], ray[1], ray[0]
+@light.enabled = false
+@sphere.mesh.eachTriangle (tri) =>
+if tri.intersectRay(ray[0], direction, dest = [])
+console.log "Point clicked: [#{dest[0]}, #{dest[1]}, #{dest[2]}] (distance: #{dest[3]})"
+@light.enabled = true
+null
+*/
 	}
 };
 

@@ -87,6 +87,7 @@ Renderer.prototype.initShaders = function (){
 
 Renderer.prototype.render = function(){
 	//console.log("Render!");
+	//this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
 	for (i = 0; i < this.loadedObjects.length; i++)
@@ -94,6 +95,10 @@ Renderer.prototype.render = function(){
 }
 
 Renderer.prototype.resizeIfNeeded = function(){
+/*	 
+http://cs.nyu.edu/~yap/classes/visual/01f/lect/l2/
+Here is a typical use of viewport: suppose you have an image to display and it has a particular aspect ratio R = Width/Height. If the user resize the window to a different aspect ratio, the image will be distorted. To avoid this, you set up the display callback function to use a viewport with the correct ratio R, and that is maximized to fit the current window. See [Hill, Chap.3.2.2, p.92].
+*/
 	// Get the canvas from the WebGL context
 	var canvas = this.gl.canvas;
 	 
@@ -111,6 +116,10 @@ Renderer.prototype.resizeIfNeeded = function(){
 		 
 		// Set the viewport to match
 		this.gl.viewport(0, 0, canvas.width, canvas.height);
+		this.viewport = {
+			width: canvas.width,
+			height: canvas.height
+		};
 	}
 }
 
@@ -164,4 +173,25 @@ Renderer.prototype.getModelViewMatrix = function(){
 	var up = vec3(0.0, 1.0, 0.0);  // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
 
 	return lookAt(eye,at,up);
+}
+
+Renderer.prototype.unproject = function(viewport_x, viewport_y){
+	/* ViewPort to NDC */
+	var ray_ndc = vec3(
+		(2.0*viewport_x)/this.viewport.width - 1.0,
+		1.0 - (2.0*viewport_y)/this.viewport.height,
+		1.0
+	);
+
+	console.log("ray_ndc: "+ray_ndc);
+	/* NDC to Homogeneus Coordinates */
+	var ray_clip = vec4(
+		ray_ndc[0],
+		ray_ndc[1],
+		-1.0,
+		1.0
+	);
+	console.log("ray_clip: "+ray_clip);
+	/* Homogeneus Coordinates to Eye Coordinates */
+	//var ray_eye = 
 }
