@@ -117,6 +117,8 @@ VirtualTrackBall.prototype = {
 		this.q = new Quaternion();
 		this.start = null;
 		this.end = null;
+		this.startW = null;
+		this.endW = null;
 	},
 	
 	getTrackBallVector:function(win_x, win_y){
@@ -182,29 +184,8 @@ VirtualTrackBall.prototype = {
 	},
 	
 	translateTo: function(win_x, win_y){
-		this.end = this.getTrackBallVector(win_x, win_y);
-		console.log("Translate from "+this.start+" to "+this.end);
-		this.start=this.end;
-	},
-
-	getTranslationMatrix:function(){
-		var temp = mat4(
-			vec4(1,0,0,0),
-			vec4(0,1,0,0),
-			vec4(0,0,1,0),
-			vec4(0,0,0,1)
-		);
-		if(this.start===null || this.end===null){
-			return temp;
-		}
-		var t = this.end.sub(this.start).len();
-		console.log("t="+t);
-		return mat4(
-			vec4(1,0,0,0.1),
-			vec4(0,1,0,0),
-			vec4(0,0,1,0),
-			vec4(0,0,0,1)
-		);
+		/*this.end = this.getTrackBallVector(win_x, win_y);
+		this.start=this.end;*/
 	},
 
 	min:function(x, y){
@@ -216,6 +197,33 @@ VirtualTrackBall.prototype = {
 	},
 
 };
+
+VirtualTrackBall.prototype.getTranslationMatrix = function(){
+	var temp = mat4(
+		vec4(1,0,0,0),
+		vec4(0,1,0,0),
+		vec4(0,0,1,0),
+		vec4(0,0,0,1)
+	);
+	if(this.startW===null || this.endW===null){
+		return temp;
+	}
+	console.log("Translate from "+this.startW+" to "+this.endW);
+	var pixel_diff = this.startW[0] - this.endW[0];
+	
+
+	//pixel_diff = (2.0*pixel_diff)/this.width - 1.0;
+	pixel_diff /= this.width;
+	console.log( "pixel_diff= "+ pixel_diff );
+	/*var t = length( sub( this.startW, this.endW ) );
+	console.log("t="+t);*/
+	return mat4(
+		vec4(1,0,0,pixel_diff),
+		vec4(0,1,0,0),
+		vec4(0,0,1,0),
+		vec4(0,0,0,1)
+	);
+}
 
 STATE = {
 	TRANSLATE: 0,
@@ -249,7 +257,12 @@ CanvasVTB.prototype.mouseDownHandler = function() {
 	return function(event) {
 		that.mousedown = true;
 		var rect = that.canvas.getBoundingClientRect();
-		that.setRotationStart(event.clientX - rect.left, event.clientY - rect.top);
+
+		var x = event.clientX - rect.left;
+		var y = event.clientY - rect.top;
+
+		that.startW = vec2( x, y );
+		that.setRotationStart( x, y );
 /*		var x = event.pageX - that.canvas.offsetLeft;
 		var y = event.pageY - that.canvas.offsetTop;*/
 //		that.setRotationStart(x,y);
@@ -271,6 +284,8 @@ CanvasVTB.prototype.mouseMoveHandler = function() {
 			var rect = that.canvas.getBoundingClientRect();
 			var x = event.clientX - rect.left;
 			var y = event.clientY - rect.top;
+
+			that.endW = vec2( x, y );
 /*			var x = event.pageX - that.canvas.offsetLeft;
 			var y = event.pageY - that.canvas.offsetTop;*/
 

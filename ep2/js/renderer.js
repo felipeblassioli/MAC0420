@@ -84,10 +84,11 @@ Renderer.prototype.loadObject = function(data){
 
 Renderer.prototype.removeSelectedObject = function(){
 	console.log("renderer.loadedObject()");
+
 	var index = this.loadedObjects.indexOf(this.activeObject);
 	console.log("Index to be removed: "+index);
 	this.loadedObjects.splice(index, 1);
-
+	this.switchSelectedObject();
 	this.render();
 }
 
@@ -96,9 +97,13 @@ Renderer.prototype.switchSelectedObject = function(){
 	var newIndex = ((index + 1) >= this.loadedObjects.length) ? 0 : (index + 1);
 	
 	console.log("index: "+index+" newIndex: "+newIndex);
-	this.activeObject.unselect();
-	this.activeObject = this.loadedObjects[newIndex];
-	this.activeObject.select();
+	if(this.loadedObjects.length > 0 ){
+		this.activeObject.unselect();
+		this.activeObject = this.loadedObjects[newIndex];
+		this.activeObject.select();
+	}else{
+		this.activeObject = null;
+	}
 
 	this.render();
 }
