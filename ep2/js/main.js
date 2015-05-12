@@ -7,6 +7,13 @@ app.init = function(){
 	app.UI.init();
 	app.renderer.init(canvas);
 	app.renderer.start();
+
+	var help = "";
+	help += "Aperte X para deletar o objeto selecionado. <br />";
+	help += "Aperte T para transladar o objeto selecionado. <br />";
+	help += "Aperte R para rotacionar o objeto selecionado. <br />";
+	help += "Aperte S para escalar o objeto selecionado. <br />";
+	app.showMessage(help);
 }
 
 app.UI = {
@@ -69,6 +76,13 @@ null
 	}
 };
 
+app.showMessage = function(msg){
+	document.getElementById("messages").innerHTML = msg;
+}
+
+app.clearMessages = function(){
+	app.showMessage("");
+}
 
 window.onload = app.init;
 

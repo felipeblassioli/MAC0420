@@ -51,6 +51,7 @@ var Renderer = function(){
 	this.loadedObjects = [];
 	this.reader = new ObjectReader();
 	this.programs = {};
+	this.activeObject;
 }
 
 Renderer.prototype.init = function(canvas){
@@ -70,6 +71,14 @@ Renderer.prototype.loadObject = function(data){
 	console.log("renderer.loadedObject()");
 	var obj = this.reader.loadObjFile(data);
 	this.loadedObjects.push(obj);
+	this.activeObject = obj;
+}
+
+Renderer.prototype.removeSelectedObject = function(){
+	console.log("renderer.loadedObject()");
+	var index = this.loadedObjects.indexOf(this.activeObject);
+	console.log("Index to be removed: "+index);
+	this.loadedObjects.splice(index, 1);
 }
 
 Renderer.prototype.start = function(){

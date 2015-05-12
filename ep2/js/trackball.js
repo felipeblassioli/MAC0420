@@ -195,6 +195,11 @@ var CanvasVTB = function(canvas) {
 	this.canvas.addEventListener( "mousedown", this.mouseDownHandler(), false );
 	this.canvas.addEventListener( "mouseup", this.mouseUpHandler(), false );
 	this.canvas.addEventListener( "mousemove", this.mouseMoveHandler(), false);
+
+	window.addEventListener( 'keydown', this.keyDownHandler(), false );
+	window.addEventListener( 'keyup', this.keyUpHandler(), false );
+
+	//this._state = 
 };
 
 CanvasVTB.prototype = new VirtualTrackBall();
@@ -238,3 +243,58 @@ CanvasVTB.prototype.mouseMoveHandler = function() {
 		}
 	};
 };
+
+CanvasVTB.prototype.keyDownHandler = function(){
+	var that = this;
+	return function(event){
+/*		if ( _this.enabled === false ) return;*/
+		//window.removeEventListener( 'keydown', keydown );
+		//console.log("keyCode: "+event.keyCode);
+
+		switch( event.keyCode ){
+			case 16:
+				console.log("Shift pressed");
+				break;
+			case 88: // x
+				console.log("DELETE");
+				app.renderer.removeSelectedObject();
+				break;
+			case 84: // t
+				console.log("TRANSLATE");
+				break;
+			case 82: // r
+				console.log("ROTATE");
+				break;
+			case 83: // s
+				console.log("SCALE");
+				break;
+		}
+/*		_prevState = _state;
+		if ( _state !== STATE.NONE ) {
+			return;
+		} else if ( event.keyCode === _this.keys[ STATE.ROTATE ] && !_this.noRotate ) {
+			_state = STATE.ROTATE;
+		} else if ( event.keyCode === _this.keys[ STATE.ZOOM ] && !_this.noZoom ) {
+			_state = STATE.ZOOM;
+		} else if ( event.keyCode === _this.keys[ STATE.PAN ] && !_this.noPan ) {
+			_state = STATE.PAN;
+		}*/
+	};
+}
+
+CanvasVTB.prototype.keyUpHandler = function(){
+	var that = this;
+	return function(event){
+		if(event.keyCode == 16){
+			console.log("Shift unpressed");
+		}
+		//window.addEventListener( 'keydown', keydown, false );
+/*		if ( _this.enabled === false ) return;
+			_state = _prevState;
+		window.addEventListener( 'keydown', keydown, false );*/
+	};
+}
+
+function keydown( event ) {
+
+}
