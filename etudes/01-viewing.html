@@ -16,6 +16,7 @@ uniform mat4 projectionMatrix;
 
 void main(){
     gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    gl_PointSize = 10.0;
 }
 </script>
 
@@ -189,11 +190,13 @@ function render(){
     //console.log(projectionMatrix);
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
+    //pointSizeUniformLocation = gl.getUniformLocation(prog, "pointSize");
     
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( modelViewMatrix ) );
     gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( projectionMatrix ) );
+    //gl.uniform1f(pointSizeUniformLocation, 10.0);
 
-    gl.drawArrays( gl.LINES, 0, vertices.length );
+    gl.drawArrays( gl.POINTS, 0, vertices.length );
 }
 
 window.onload = function(){
@@ -201,10 +204,13 @@ window.onload = function(){
     initGL();
 
     vertices.push( vec4( -1, -1, 0.5 ) );
+    vertices.push( vec4( 1, 1, 0.5 ) );
     //vertices.push( vec4( 1, -1, 0.5 ) );
     //vertices.push( vec4( 1, -1, 0.5 ) );
-    vertices.push( vec4( 0, 1, 0.5 ) );
+    /*vertices.push( vec4( 0, 1, 0.5 ) );*/
 
+    vertices.push( vec4(0,0,0) );
+     vertices.push( vec4( 0.5,0,0 ) );
 
 /*    vertices.push( vec4( -2, -2,  0.9 ) );
     vertices.push( vec4( 2, -2, 0.9 ) );
