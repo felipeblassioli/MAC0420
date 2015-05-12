@@ -182,11 +182,6 @@ VirtualTrackBall.prototype = {
 		}
 		return this.q.makeRotationFromQuaternion();
 	},
-	
-	translateTo: function(win_x, win_y){
-		/*this.end = this.getTrackBallVector(win_x, win_y);
-		this.start=this.end;*/
-	},
 
 	min:function(x, y){
 		if(x>y){
@@ -197,33 +192,6 @@ VirtualTrackBall.prototype = {
 	},
 
 };
-
-VirtualTrackBall.prototype.getTranslationMatrix = function(){
-	var temp = mat4(
-		vec4(1,0,0,0),
-		vec4(0,1,0,0),
-		vec4(0,0,1,0),
-		vec4(0,0,0,1)
-	);
-	if(this.startW===null || this.endW===null){
-		return temp;
-	}
-	console.log("Translate from "+this.startW+" to "+this.endW);
-	var pixel_diff = this.startW[0] - this.endW[0];
-	
-
-	//pixel_diff = (2.0*pixel_diff)/this.width - 1.0;
-	pixel_diff /= this.width;
-	console.log( "pixel_diff= "+ pixel_diff );
-	/*var t = length( sub( this.startW, this.endW ) );
-	console.log("t="+t);*/
-	return mat4(
-		vec4(1,0,0,pixel_diff),
-		vec4(0,1,0,0),
-		vec4(0,0,1,0),
-		vec4(0,0,0,1)
-	);
-}
 
 STATE = {
 	TRANSLATE: 0,
@@ -293,7 +261,9 @@ CanvasVTB.prototype.mouseMoveHandler = function() {
 			if(x && y){
 				switch(that._state){
 					case STATE.ROTATE:
-						that.rotateTo( x, y );
+						//that.rotateTo( x, y );
+						app.renderer.activeObject.rotate( that.startW, that.endW );
+						//that.start = end;
 						break;
 					case STATE.TRANSLATE:
 						app.renderer.activeObject.translate( that.startW, that.endW );
