@@ -1,46 +1,10 @@
 
-var Model = function(vertices, normals, centroid, bbox){
+var Model = function(){
 	this.vertices = vertices || [];
 	this.normals = normals || [];
-	this.centroid = centroid;
-
-	this.bbox = new BoundingBox(bbox);
-	this.boundingSphere = this.getBoundingSphere();
-}
-
-Model.prototype.getBoundingSphereRadius = function(){
-	var d = Math.sqrt(
-		Math.pow( this.bbox.right[0] - this.bbox.left[0], 2 )
-		+ Math.pow( this.bbox.top[1] - this.bbox.bottom[1], 2 )
-		+ Math.pow( this.bbox.far[2] - this.bbox.near[2], 2 )
-	);
-	return d/2;
-}
-
-Model.prototype.getBoundingSphere = function(){
-	var sphere = {};
-	sphere.radius = this.getBoundingSphereRadius();
-	sphere.center = this.bbox.center;
-	return sphere;
 }
 
 Model.prototype.render = function(gl, program, viewMatrix, projectionMatrix){
-
-	var nBuffer = gl.createBuffer();
-	gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
-	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.normals), gl.STATIC_DRAW );
-
-	var vNormal = gl.getAttribLocation( program, "vNormal" );
-	gl.vertexAttribPointer( vNormal, 4, gl.FLOAT, false, 0, 0 );
-	gl.enableVertexAttribArray( vNormal );
-
-	var vBuffer = gl.createBuffer();
-	gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
-	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.vertices), gl.STATIC_DRAW );
-
-	var vPosition = gl.getAttribLocation(program, "vPosition");
-	gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(vPosition);
 
 	var modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 	var projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
@@ -48,9 +12,7 @@ Model.prototype.render = function(gl, program, viewMatrix, projectionMatrix){
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( this.getModelViewMatrix(viewMatrix) ) );
 	gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( projectionMatrix ) );
 
-	gl.drawArrays( gl.TRIANGLES, 0, this.vertices.length );
-
-	//this.bbox.render(gl, program, canvas);
+	this._render( gl, program );
 }
 
 Model.prototype.getModelViewMatrix = function(viewMatrix){
@@ -67,6 +29,54 @@ Model.prototype.getModelMatrix = function(){
 	);
 
 	return modelMatrix;
+}
+
+var TriangleMesh = function(vertices, normals, centroid, bbox){
+	this.vertices = vertices || [];
+	this.normals = normals || [];
+	this.centroid = centroid;
+
+	this.bbox = new BoundingBox(bbox);
+	this.boundingSphere = this.getBoundingSphere();
+	this.activeManipulator = new TranslationManipulator(this);
+}
+
+TriangleMesh.prototype = Object.create(Model.prototype);
+TriangleMesh.prototype.constructor = TriangleMesh;
+TriangleMesh.prototype.getBoundingSphereRadius = function(){
+	var d = Math.sqrt(
+		Math.pow( this.bbox.right[0] - this.bbox.left[0], 2 )
+		+ Math.pow( this.bbox.top[1] - this.bbox.bottom[1], 2 )
+		+ Math.pow( this.bbox.far[2] - this.bbox.near[2], 2 )
+	);
+	return d/2;
+}
+
+TriangleMesh.prototype.getBoundingSphere = function(){
+	var sphere = {};
+	sphere.radius = this.getBoundingSphereRadius();
+	sphere.center = this.bbox.center;
+	return sphere;
+}
+
+TriangleMesh.prototype._render = function(gl, program){
+	var nBuffer = gl.createBuffer();
+	gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
+	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.normals), gl.STATIC_DRAW );
+
+	var vNormal = gl.getAttribLocation( program, "vNormal" );
+	gl.vertexAttribPointer( vNormal, 4, gl.FLOAT, false, 0, 0 );
+	gl.enableVertexAttribArray( vNormal );
+
+	var vBuffer = gl.createBuffer();
+	gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
+	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.vertices), gl.STATIC_DRAW );
+
+	var vPosition = gl.getAttribLocation(program, "vPosition");
+	gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(vPosition);
+
+	gl.drawArrays( gl.TRIANGLES, 0, this.vertices.length );
 }
 
 var BoundingBox = function(bbox){
@@ -167,4 +177,39 @@ BoundingBox.prototype.getWireFrame = function(){
 
 BoundingBox.prototype.intersect = function(ray){
 
+}
+
+var TranslationManipulator = function(model){
+	this.origin = model.boundingSphere.center;
+	var len = model.boundingSphere.radius * 1.0;
+	this.vertices = [
+		vec3(0,0,0),
+		vec3(len,0,0),
+		vec3(0,0,0),
+		vec3(0,len,0),
+		vec3(0,0,0),
+		vec3(0,0,len)
+	];
+}
+
+TranslationManipulator.prototype = Object.create(Model.prototype);
+TranslationManipulator.prototype.constructor = TranslationManipulator;
+TranslationManipulator.prototype.render = function(gl, program, viewMatrix, projectionMatrix){
+
+	var vBuffer = gl.createBuffer();
+	gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
+	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.vertices), gl.STATIC_DRAW );
+
+	var vPosition = gl.getAttribLocation(program, "vPosition");
+	gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(vPosition);
+
+	var modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
+	var projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
+    
+
+	gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( this.getModelViewMatrix(viewMatrix) ) );
+	gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( projectionMatrix ) );
+
+	gl.drawArrays( gl.LINES, 0, this.vertices.length );
 }

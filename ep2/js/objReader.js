@@ -244,7 +244,7 @@ function ObjectReader(){
 		console.log('normals count '+result.normals.length);
 		
 		// (iii) Return vertices and normals and any associated information you might find useful
-		var model = new Model(result.vertices, result.normals, result.centroid, result.bounds);
+		var model = new TriangleMesh(result.vertices, result.normals, result.centroid, result.bounds);
 		return model;
 	};
 
