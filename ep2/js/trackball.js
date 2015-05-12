@@ -273,7 +273,7 @@ CanvasVTB.prototype.mouseUpHandler = function() {
 	var that = this;
 	return function(event) {
 		that.mousedown = false;
-		app.renderer.commit();
+		//app.renderer.commit();
 	};
 };
 
@@ -296,7 +296,7 @@ CanvasVTB.prototype.mouseMoveHandler = function() {
 						that.rotateTo( x, y );
 						break;
 					case STATE.TRANSLATE:
-						that.translateTo( x, y );
+						app.renderer.activeObject.translate( that.startW, that.endW );
 						break;
 					case STATE.SCALE:
 						break;
