@@ -40,8 +40,8 @@ var TriangleMesh = function(vertices, normals, centroid, bbox){
 
 	this.bbox = new BoundingBox(bbox);
 	this.boundingSphere = this.getBoundingSphere();
-	this.activeManipulator = new TranslationManipulator(this.boundingSphere.radius);
-	//this.activeManipulator = new RotationManipulator(this);
+	//this.activeManipulator = new TranslationManipulator(this.boundingSphere.radius);
+	this.activeManipulator = new RotationManipulator(this);
 }
 
 TriangleMesh.prototype = Object.create(Model.prototype);
@@ -221,33 +221,46 @@ TranslationManipulator.prototype.render = function(gl, program, viewMatrix, proj
 }
 
 var RotationManipulator = function(model){
-	var numTris = 100;
-	var center = model.boundingSphere.center;
-	this.vertices = [];
-
-	var degPerTri = (2 * Math.PI) / numTris;
-
-	for(var i = 0; i <= numTris; i++) {
-		var angle = degPerTri * i;
-		this.vertices.push( vec3( Math.cos(angle), Math.sin(angle), 0 ) );
-	}
-
-	for(var i = 0; i <= numTris; i++) {
-		var angle = degPerTri * i;
-		this.vertices.push( vec3( 0, Math.cos(angle), Math.sin(angle) ) );
-	}
-
-	for(var i = 0; i <= numTris; i++) {
-		var angle = degPerTri * i;
-		this.vertices.push( vec3( Math.cos(angle), 0, Math.sin(angle) ) );
-	}
+	this.circles = [
+		new Circle(0),
+		new Circle(1),
+		new Circle(2)
+	];
 }
 
 RotationManipulator.prototype = Object.create(Model.prototype);
 RotationManipulator.prototype.constructor = RotationManipulator;
 RotationManipulator.prototype._render = function(gl,program){
-	var l = this.vertices.length/3;
+	this.circles.forEach( function( c ) {
+		c._render( gl, program );
+	});
+}
 
+var Circle = function(axis){
+	var numTris = 100;
+	var degPerTri = (2 * Math.PI) / numTris;
+
+	this.vertices = [];
+	for(var i = 0; i <= numTris; i++) {
+		var angle = degPerTri * i;
+		switch(axis){
+			case 0:
+				this.vertices.push( vec3( 0, Math.cos(angle), Math.sin(angle) ) );
+				break;
+			case 1:
+				this.vertices.push( vec3( Math.cos(angle), 0, Math.sin(angle) ) );
+				break;
+			case 2:
+				this.vertices.push( vec3( Math.cos(angle), Math.sin(angle), 0 ) );
+				break;
+		}
+		
+	}
+}
+
+Circle.prototype = Object.create(Model.prototype);
+Circle.prototype.constructor = Circle;
+Circle.prototype._render = function( gl, program ){
 	var vBuffer = gl.createBuffer();
 	gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
 	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.vertices), gl.STATIC_DRAW );
@@ -256,7 +269,5 @@ RotationManipulator.prototype._render = function(gl,program){
 	gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(vPosition);
 
-	gl.drawArrays( gl.LINE_STRIP, 0, l );
-	gl.drawArrays( gl.LINE_STRIP, l, l );
-	gl.drawArrays( gl.LINE_STRIP, 2*l, l );
+	gl.drawArrays( gl.LINE_STRIP, 0, this.vertices.length );
 }
