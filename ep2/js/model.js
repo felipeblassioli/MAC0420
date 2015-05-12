@@ -28,12 +28,8 @@ Model.prototype.getModelMatrix = function(){
 		vec4(0,0,0,1)
 	);
 
-/*	function applyVirtualTrackBallRotaion(){
-			var vtrm=this.cvtb.getRotationMatrix();
-			multMatrix(vtrm);
-		}*/
 	var rotMatrix = app.renderer.cvtb.getRotationMatrix();
-	modelMatrix = mult(rotMatrix, modelMatrix);
+	modelMatrix = mult(modelMatrix, rotMatrix);
 	return modelMatrix;
 }
 
@@ -44,8 +40,8 @@ var TriangleMesh = function(vertices, normals, centroid, bbox){
 
 	this.bbox = new BoundingBox(bbox);
 	this.boundingSphere = this.getBoundingSphere();
-	//this.activeManipulator = new TranslationManipulator(this);
-	this.activeManipulator = new RotationManipulator(this);
+	this.activeManipulator = new TranslationManipulator(this.boundingSphere.radius);
+	//this.activeManipulator = new RotationManipulator(this);
 }
 
 TriangleMesh.prototype = Object.create(Model.prototype);
@@ -186,9 +182,7 @@ BoundingBox.prototype.intersect = function(ray){
 
 }
 
-var TranslationManipulator = function(model){
-	this.origin = model.boundingSphere.center;
-	var len = model.boundingSphere.radius * 1.0;
+var TranslationManipulator = function(len){
 	this.vertices = [
 		vec3(0,0,0),
 		vec3(len,0,0),
@@ -214,8 +208,13 @@ TranslationManipulator.prototype.render = function(gl, program, viewMatrix, proj
 	var modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 	var projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
     
-
-	gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( this.getModelViewMatrix(viewMatrix) ) );
+    var identity = mat4(
+			vec4(1,0,0,0),
+			vec4(0,1,0,0),
+			vec4(0,0,1,0),
+			vec4(0,0,0,1)
+	);
+	gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( viewMatrix ) );
 	gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( projectionMatrix ) );
 
 	gl.drawArrays( gl.LINES, 0, this.vertices.length );
@@ -248,7 +247,7 @@ RotationManipulator.prototype = Object.create(Model.prototype);
 RotationManipulator.prototype.constructor = RotationManipulator;
 RotationManipulator.prototype._render = function(gl,program){
 	var l = this.vertices.length/3;
-	
+
 	var vBuffer = gl.createBuffer();
 	gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
 	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.vertices), gl.STATIC_DRAW );

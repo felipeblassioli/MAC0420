@@ -232,7 +232,7 @@ Renderer.prototype.getProjectionMatrix = function(){
 }
 
 Renderer.prototype.getViewMatrix = function(){
-	var eye = vec3(0.5, 1.25, -5.5);// the position of your camera, in world space
+	var eye = vec3(1.25, 3.25, +5.5);// the position of your camera, in world space
 	var at = vec3(0.0, 0.0, 0.0); // where you want to look at, in world space
 	var up = vec3(0.0, 1.0, 0.0);  // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
 
