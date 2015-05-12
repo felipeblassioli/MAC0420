@@ -43,6 +43,10 @@ Vector.prototype = {
 		this.z = this.z-a.z;
 		return this;
 	},
+
+	toString: function(){
+		return "("+this.x+","+this.y+","+this.z+")";
+	}
 };
 
 var Quaternion = function(x, y, z, w) {
@@ -111,7 +115,8 @@ VirtualTrackBall.prototype = {
 		this.height = height;
 		this.r = this.min(width, height)/2;
 		this.q = new Quaternion();
-		this.start;
+		this.start = null;
+		this.end = null;
 	},
 	
 	getTrackBallVector:function(win_x, win_y){
@@ -176,6 +181,32 @@ VirtualTrackBall.prototype = {
 		return this.q.makeRotationFromQuaternion();
 	},
 	
+	translateTo: function(win_x, win_y){
+		this.end = this.getTrackBallVector(win_x, win_y);
+		console.log("Translate from "+this.start+" to "+this.end);
+		this.start=this.end;
+	},
+
+	getTranslationMatrix:function(){
+		var temp = mat4(
+			vec4(1,0,0,0),
+			vec4(0,1,0,0),
+			vec4(0,0,1,0),
+			vec4(0,0,0,1)
+		);
+		if(this.start===null || this.end===null){
+			return temp;
+		}
+		var t = this.end.sub(this.start).len();
+		console.log("t="+t);
+		return mat4(
+			vec4(1,0,0,0.1),
+			vec4(0,1,0,0),
+			vec4(0,0,1,0),
+			vec4(0,0,0,1)
+		);
+	},
+
 	min:function(x, y){
 		if(x>y){
 			return y;
@@ -186,6 +217,12 @@ VirtualTrackBall.prototype = {
 
 };
 
+STATE = {
+	TRANSLATE: 0,
+	ROTATE: 1,
+	SCALE: 2
+}
+
 var CanvasVTB = function(canvas) {
 	this.canvas = canvas;
 	this.width = canvas.width;
@@ -195,11 +232,12 @@ var CanvasVTB = function(canvas) {
 	this.canvas.addEventListener( "mousedown", this.mouseDownHandler(), false );
 	this.canvas.addEventListener( "mouseup", this.mouseUpHandler(), false );
 	this.canvas.addEventListener( "mousemove", this.mouseMoveHandler(), false);
+	//this.canvas.addEventListener('mousewheel', this.mouseWheelHandler(), false );
 
 	window.addEventListener( 'keydown', this.keyDownHandler(), false );
 	window.addEventListener( 'keyup', this.keyUpHandler(), false );
 
-	//this._state = 
+	this._state = STATE.TRANSLATE;
 };
 
 CanvasVTB.prototype = new VirtualTrackBall();
@@ -238,7 +276,17 @@ CanvasVTB.prototype.mouseMoveHandler = function() {
 
 			//console.log("x="+x+" ; y="+y);
 			if(x && y){
-				that.rotateTo(x, y);
+				switch(that._state){
+					case STATE.ROTATE:
+						that.rotateTo( x, y );
+						break;
+					case STATE.TRANSLATE:
+						that.translateTo( x, y );
+						break;
+					case STATE.SCALE:
+						break;
+				}
+				
 				app.renderer.render();
 			}
 		}
@@ -266,12 +314,23 @@ CanvasVTB.prototype.keyDownHandler = function(){
 				break;
 			case 84: // t
 				console.log("TRANSLATE");
+				that._state = STATE.TRANSLATE;
 				break;
 			case 82: // r
 				console.log("ROTATE");
+				that._state = STATE.ROTATE;
 				break;
 			case 83: // s
 				console.log("SCALE");
+				that._state = STATE.SCALE;
+				break;
+			case 61: // +
+				app.renderer.viewScaleZ -= 0.5;
+				app.renderer.render();
+				break;
+			case 173: //-
+				app.renderer.viewScaleZ += 0.5;
+				app.renderer.render();
 				break;
 		}
 /*		_prevState = _state;
@@ -301,6 +360,11 @@ CanvasVTB.prototype.keyUpHandler = function(){
 	};
 }
 
-function keydown( event ) {
-
+CanvasVTB.prototype.mouseWheelHandler= function(){
+	var that = this;
+	return function(event){
+		var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+		console.log("delta: "+delta);
+		return false;
+	};
 }

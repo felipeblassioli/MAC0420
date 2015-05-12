@@ -29,27 +29,45 @@ Model.prototype.render = function(gl, program, viewMatrix, projectionMatrix){
 	this._render( gl, program );
 }
 
-Model.prototype.getModelViewMatrix = function(viewMatrix){
-	this.modelViewMatrix = mult( viewMatrix, this.getModelMatrix() );
-	return this.modelViewMatrix;
-}
-
 Model.prototype.getModelMatrix = function(){
 /*	if(this.isSelected){
 		var rotMatrix = app.renderer.cvtb.getRotationMatrix();
 		this.modelMatrix = mult(this.modelMatrix, rotMatrix);
 	}*/
-	this.modelMatrix = mat4(
+/*	this.modelMatrix = mat4(
 		vec4(1,0,0,0),
 		vec4(0,1,0,0),
 		vec4(0,0,1,0),
 		vec4(0,0,0,1)
-	);
-	var rotMatrix = app.renderer.cvtb.getRotationMatrix();
-	this.modelMatrix = mult(this.modelMatrix, rotMatrix);
+	);*/
+
+	if(this.isSelected){
+		switch(app.renderer.cvtb._state){
+			case STATE.ROTATE:
+				this.modelMatrix = mat4(
+					vec4(1,0,0,0),
+					vec4(0,1,0,0),
+					vec4(0,0,1,0),
+					vec4(0,0,0,1)
+				);
+				var rotMatrix = app.renderer.cvtb.getRotationMatrix();
+				this.modelMatrix = mult(this.modelMatrix, rotMatrix);
+				break;
+			case STATE.TRANSLATE:
+				var m = app.renderer.cvtb.getTranslationMatrix();
+				this.modelMatrix = mult(this.modelMatrix, m);
+				break;
+			case STATE.SCALE:
+				break;
+		}
+	}
 	return this.modelMatrix;
 }
 
+Model.prototype.getModelViewMatrix = function(viewMatrix){
+	this.modelViewMatrix = mult( viewMatrix, this.getModelMatrix() );
+	return this.modelViewMatrix;
+}
 
 var TranslationManipulator = function(model, len){
 	Model.prototype.constructor.call( this );

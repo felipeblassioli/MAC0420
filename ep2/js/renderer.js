@@ -52,6 +52,8 @@ var Renderer = function(){
 	this.reader = new ObjectReader();
 	this.programs = {};
 	this.activeObject;
+
+	this.viewScaleZ = 0.0;
 }
 
 Renderer.prototype.init = function(canvas){
@@ -260,8 +262,8 @@ function _makeFrustrum(fovY, aspectRatio, front, back){
 Renderer.prototype.getProjectionMatrix = function(){
 	var canvas = this.canvas;
 	var aspect = canvas.clientWidth/Math.max(1, canvas.clientHeight);
-	var near = 3.0;
-	var far = 7.0;
+	var near = 0.1;
+	var far = 100;
 	var fovy = 45.0;
 
 	return _makeFrustrum(fovy, aspect, near, far);
@@ -270,9 +272,9 @@ Renderer.prototype.getProjectionMatrix = function(){
 
 Renderer.prototype.getViewMatrix = function(){
 	//var eye = vec3(1.25, 3.25, +5.5);// the position of your camera, in world space
-	var eye = vec3(0, 0, +4.0)
-	var at = vec3(0.0, 0.0, 0.0); // where you want to look at, in world space
-	var up = vec3(0.0, 1.0, 0.0);  // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
+	var eye = vec3( 0, 0, +4.0 + this.viewScaleZ )
+	var at = vec3( 0.0, 0.0, 0.0 ); // where you want to look at, in world space
+	var up = vec3( 0.0, 1.0, 0.0 );  // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
 
 	var viewMatrix = lookAt(eye,at,up);
 
