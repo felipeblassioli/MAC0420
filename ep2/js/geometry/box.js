@@ -1,4 +1,6 @@
 var BoundingBox = function(bbox){
+	Model.prototype.constructor.call( this );
+	
 	console.log("BoundingBox.constructor!");
 	this.left = bbox.left;
 	this.right = bbox.right;

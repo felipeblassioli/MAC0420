@@ -1,4 +1,6 @@
 var TriangleMesh = function(vertices, normals, centroid, bbox){
+	Model.prototype.constructor.call( this );
+
 	this.vertices = vertices || [];
 	this.normals = normals || [];
 	this.centroid = centroid;
@@ -54,4 +56,14 @@ TriangleMesh.prototype._render = function(gl, program){
 /*
 	c = new Circle(this.bbox.center, this.boundingSphere.radius * 0.5, 0, true);
 	c._render(gl, program);*/
+}
+
+TriangleMesh.prototype.select = function(){
+	this.isSelected = true;
+	this.bbox.isSelected = true;
+}
+
+TriangleMesh.prototype.unselect = function(){
+	this.isSelected = false;
+	this.bbox.isSelected = false;
 }

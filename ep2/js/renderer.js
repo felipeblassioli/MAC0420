@@ -70,8 +70,14 @@ Renderer.prototype.init = function(canvas){
 Renderer.prototype.loadObject = function(data){
 	console.log("renderer.loadedObject()");
 	var obj = this.reader.loadObjFile(data);
+
 	this.loadedObjects.push(obj);
+	if(this.activeObject)
+		this.activeObject.unselect();
 	this.activeObject = obj;
+	this.activeObject.select();
+
+	this.render();
 }
 
 Renderer.prototype.removeSelectedObject = function(){
@@ -79,6 +85,20 @@ Renderer.prototype.removeSelectedObject = function(){
 	var index = this.loadedObjects.indexOf(this.activeObject);
 	console.log("Index to be removed: "+index);
 	this.loadedObjects.splice(index, 1);
+
+	this.render();
+}
+
+Renderer.prototype.switchSelectedObject = function(){
+	var index = this.loadedObjects.indexOf(this.activeObject);
+	var newIndex = ((index + 1) >= this.loadedObjects.length) ? 0 : (index + 1);
+	
+	console.log("index: "+index+" newIndex: "+newIndex);
+	this.activeObject.unselect();
+	this.activeObject = this.loadedObjects[newIndex];
+	this.activeObject.select();
+
+	this.render();
 }
 
 Renderer.prototype.start = function(){
@@ -152,6 +172,7 @@ Renderer.prototype.activateProgram = function(program){
 Renderer.prototype.render = function(){
 	//console.log("Render!");
 	//this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+	this.resizeIfNeeded();
 	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
 	var viewMatrix = this.getViewMatrix();
@@ -161,11 +182,18 @@ Renderer.prototype.render = function(){
 		this.activateProgram( this.programs.model );
 		this.loadedObjects[i].render( this.gl, this.currentProgram, viewMatrix, projectionMatrix );
 
-		this.activateProgram( this.programs.wireframe );
+	/*	this.activateProgram( this.programs.wireframe );
 		this.loadedObjects[i].bbox.render( this.gl, this.currentProgram, viewMatrix, projectionMatrix );
 
 		if(this.loadedObjects[i].activeManipulator)
 			this.loadedObjects[i].activeManipulator.render( this.gl, this.currentProgram, viewMatrix, projectionMatrix );
+	*/}
+	if(this.activeObject){
+		this.activateProgram( this.programs.wireframe );
+		this.activeObject.bbox.render( this.gl, this.currentProgram, viewMatrix, projectionMatrix );
+
+		if(this.activeObject.activeManipulator)
+			this.activeObject.activeManipulator.render( this.gl, this.currentProgram, viewMatrix, projectionMatrix );
 	}
 }
 

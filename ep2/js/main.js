@@ -6,7 +6,7 @@ app.init = function(){
 	canvas = document.getElementById( "gl-canvas" );
 	app.UI.init();
 	app.renderer.init(canvas);
-	app.renderer.start();
+	//app.renderer.start();
 
 	var help = "";
 	help += "Aperte X para deletar o objeto selecionado. <br />";

@@ -219,9 +219,10 @@ CanvasVTB.prototype.mouseDownHandler = function() {
 };
 
 CanvasVTB.prototype.mouseUpHandler = function() {
-	var currentObj = this;
+	var that = this;
 	return function(event) {
-		currentObj.mousedown = false;
+		that.mousedown = false;
+		app.renderer.commit();
 	};
 };
 
@@ -236,10 +237,10 @@ CanvasVTB.prototype.mouseMoveHandler = function() {
 			var y = event.pageY - that.canvas.offsetTop;*/
 
 			//console.log("x="+x+" ; y="+y);
-			if(x && y)
+			if(x && y){
 				that.rotateTo(x, y);
-
-			//app.renderer.render();
+				app.renderer.render();
+			}
 		}
 	};
 };
@@ -249,11 +250,15 @@ CanvasVTB.prototype.keyDownHandler = function(){
 	return function(event){
 /*		if ( _this.enabled === false ) return;*/
 		//window.removeEventListener( 'keydown', keydown );
-		//console.log("keyCode: "+event.keyCode);
+		console.log("keyCode: "+event.keyCode);
 
 		switch( event.keyCode ){
-			case 16:
+			case 9: // TAB
+				app.renderer.switchSelectedObject();
+				break;
+			case 16: // SHIFT
 				console.log("Shift pressed");
+				that._modifier = true;
 				break;
 			case 88: // x
 				console.log("DELETE");
@@ -287,6 +292,7 @@ CanvasVTB.prototype.keyUpHandler = function(){
 	return function(event){
 		if(event.keyCode == 16){
 			console.log("Shift unpressed");
+			that._modifier = false;
 		}
 		//window.addEventListener( 'keydown', keydown, false );
 /*		if ( _this.enabled === false ) return;

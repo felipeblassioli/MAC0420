@@ -1,8 +1,15 @@
 
 var Model = function(){
-	this.vertices = vertices || [];
-	this.normals = normals || [];
+	this.vertices = [];
+	this.normals = [];
 	this.modelViewMatrix = mat4(
+		vec4(1,0,0,0),
+		vec4(0,1,0,0),
+		vec4(0,0,1,0),
+		vec4(0,0,0,1)
+	);
+	this.isSelected = false;
+	this.modelMatrix = mat4(
 		vec4(1,0,0,0),
 		vec4(0,1,0,0),
 		vec4(0,0,1,0),
@@ -10,6 +17,7 @@ var Model = function(){
 	);
 }
 
+Model.prototype.constructor = Model;
 Model.prototype.render = function(gl, program, viewMatrix, projectionMatrix){
 
 	var modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
@@ -27,22 +35,25 @@ Model.prototype.getModelViewMatrix = function(viewMatrix){
 }
 
 Model.prototype.getModelMatrix = function(){
-	/* View */
-	var modelMatrix = mat4(
+/*	if(this.isSelected){
+		var rotMatrix = app.renderer.cvtb.getRotationMatrix();
+		this.modelMatrix = mult(this.modelMatrix, rotMatrix);
+	}*/
+	this.modelMatrix = mat4(
 		vec4(1,0,0,0),
 		vec4(0,1,0,0),
 		vec4(0,0,1,0),
 		vec4(0,0,0,1)
 	);
-
 	var rotMatrix = app.renderer.cvtb.getRotationMatrix();
-	modelMatrix = mult(modelMatrix, rotMatrix);
-
-	return modelMatrix;
+	this.modelMatrix = mult(this.modelMatrix, rotMatrix);
+	return this.modelMatrix;
 }
 
 
 var TranslationManipulator = function(model, len){
+	Model.prototype.constructor.call( this );
+
 	this.model = model;
 	this.len = len;
 	console.log("len is "+len);
@@ -119,6 +130,7 @@ RotationManipulator.prototype._render = function(gl,program){
 }
 
 var Circle = function(center, radius, axis, filled){
+	Model.prototype.constructor.call( this );
 	this.filled = typeof filled !== 'undefined' ? filled : false;
 
 	var numTris = 100;
