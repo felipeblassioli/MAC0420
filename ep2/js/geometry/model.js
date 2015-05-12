@@ -66,21 +66,35 @@ TranslationManipulator.prototype.render = function(gl, program, viewMatrix, proj
 	gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( viewMatrix ) );
 	gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( projectionMatrix ) );
 
-	gl.drawArrays( gl.LINES, 0, this.getVertices().length );
+	gl.drawArrays( gl.LINES, 0, 6 );
+
+/*	gl.drawArrays( gl.TRIANGLES, 6, 9 );*/
 
 }
 
 TranslationManipulator.prototype.getVertices = function(){
 	var center = this.model.bbox.getCenter();
 	var len = this.len;
+	var x = add( center, vec3(len,0,0) );
+	var y = add( center, vec3(0,len,0) );
+	var z =add( center, vec3(0,0,len) );
+	/* arrow length */
+	var al = 0.1;
+
 	//console.log("Center is "+center);
 	this.vertices = [
-		center,
-		add( center, vec3(len,0,0) ),
-		center,
-		add( center, vec3(0,len,0) ),
-		center,
-		add( center, vec3(0,0,len) )
+		center, x,
+		center, y,
+		center, z/*,
+		add( x, vec3( al, 0, 0 ) ),
+		add( x, vec3( 0, al, 0 ) ),
+		add( x, vec3( 0, 0, al ) ),
+		add( y, vec3( al, 0, 0 ) ),
+		add( y, vec3( 0, al, 0 ) ),
+		add( y, vec3( 0, 0, al ) ),
+		add( z, vec3( al, 0, 0 ) ),
+		add( z, vec3( 0, al, 0 ) ),
+		add( z, vec3( 0, 0, al ) )*/
 	];
 	//this.vertices = [];
 	return this.vertices;

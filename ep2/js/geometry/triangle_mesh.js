@@ -51,7 +51,7 @@ TriangleMesh.prototype._render = function(gl, program){
 
 	gl.drawArrays( gl.TRIANGLES, 0, this.vertices.length );
 
-
+/*
 	c = new Circle(this.bbox.center, this.boundingSphere.radius * 0.5, 0, true);
-	c._render(gl, program);
+	c._render(gl, program);*/
 }
