@@ -13,7 +13,7 @@ app.UI = {
 	init: function(){
 		console.log("app.UI.init()");
 		document.getElementById('files').onchange = app.UI.onFilesChange;
-		document.getElementById('gl-canvas').onclick = app.UI.onCanvasClick;
+		//document.getElementById('gl-canvas').onclick = app.UI.onCanvasClick;
 	},
 
 	onFilesChange: function(evt){
@@ -45,8 +45,9 @@ app.UI = {
 		console.log("canvas ("+x+", "+y+")");
 
 		var ray = app.renderer.unproject(x,y);
-		console.log("Ray:");
-		console.log(ray);
+		//var dir = subtract( ray[1], ray[0] );
+/*		console.log("Ray:");
+		console.log(ray);*/
 		// Collision detection between clicked offset and element.
 		/*elements.forEach(function(element) {
 		if (y > element.top && y < element.top + element.height 

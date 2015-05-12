@@ -28,6 +28,12 @@ Model.prototype.getModelMatrix = function(){
 		vec4(0,0,0,1)
 	);
 
+/*	function applyVirtualTrackBallRotaion(){
+			var vtrm=this.cvtb.getRotationMatrix();
+			multMatrix(vtrm);
+		}*/
+	var rotMatrix = app.renderer.cvtb.getRotationMatrix();
+	modelMatrix = mult(rotMatrix, modelMatrix);
 	return modelMatrix;
 }
 
@@ -38,7 +44,8 @@ var TriangleMesh = function(vertices, normals, centroid, bbox){
 
 	this.bbox = new BoundingBox(bbox);
 	this.boundingSphere = this.getBoundingSphere();
-	this.activeManipulator = new TranslationManipulator(this);
+	//this.activeManipulator = new TranslationManipulator(this);
+	this.activeManipulator = new RotationManipulator(this);
 }
 
 TriangleMesh.prototype = Object.create(Model.prototype);
@@ -212,4 +219,45 @@ TranslationManipulator.prototype.render = function(gl, program, viewMatrix, proj
 	gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( projectionMatrix ) );
 
 	gl.drawArrays( gl.LINES, 0, this.vertices.length );
+}
+
+var RotationManipulator = function(model){
+	var numTris = 100;
+	var center = model.boundingSphere.center;
+	this.vertices = [];
+
+	var degPerTri = (2 * Math.PI) / numTris;
+
+	for(var i = 0; i <= numTris; i++) {
+		var angle = degPerTri * i;
+		this.vertices.push( vec3( Math.cos(angle), Math.sin(angle), 0 ) );
+	}
+
+	for(var i = 0; i <= numTris; i++) {
+		var angle = degPerTri * i;
+		this.vertices.push( vec3( 0, Math.cos(angle), Math.sin(angle) ) );
+	}
+
+	for(var i = 0; i <= numTris; i++) {
+		var angle = degPerTri * i;
+		this.vertices.push( vec3( Math.cos(angle), 0, Math.sin(angle) ) );
+	}
+}
+
+RotationManipulator.prototype = Object.create(Model.prototype);
+RotationManipulator.prototype.constructor = RotationManipulator;
+RotationManipulator.prototype._render = function(gl,program){
+	var l = this.vertices.length/3;
+	
+	var vBuffer = gl.createBuffer();
+	gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
+	gl.bufferData( gl.ARRAY_BUFFER, flatten(this.vertices), gl.STATIC_DRAW );
+	
+	var vPosition = gl.getAttribLocation(program, "vPosition");
+	gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(vPosition);
+
+	gl.drawArrays( gl.LINE_STRIP, 0, l );
+	gl.drawArrays( gl.LINE_STRIP, l, l );
+	gl.drawArrays( gl.LINE_STRIP, 2*l, l );
 }

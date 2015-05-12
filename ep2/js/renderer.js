@@ -56,6 +56,12 @@ var Renderer = function(){
 Renderer.prototype.init = function(canvas){
 	console.log("renderer.init()");
 	this.canvas = canvas;
+
+	/*this.viewport = {
+		width: canvas.width,
+		height: canvas.height
+	};*/
+	this.cvtb = new CanvasVTB(canvas);
 	this.initGL(canvas);
 	this.initShaders();
 }
@@ -180,6 +186,7 @@ Here is a typical use of viewport: suppose you have an image to display and it h
 			width: canvas.width,
 			height: canvas.height
 		};
+		this.cvtb.setWinSize( this.viewport.width, this.viewport.height );
 	}
 }
 
@@ -242,6 +249,8 @@ Renderer.prototype.unproject = function(viewport_x, viewport_y){
 		1.0
 	);
 
+	console.log("win_x="+viewport_x+" ; win_y="+viewport_y);
+	console.log("width="+this.viewport.width+" ; height="+this.viewport.height);
 	console.log("ray_ndc: "+ray_ndc);
 	/* NDC to Homogeneus Coordinates */
 	var ray_clip = vec4(
