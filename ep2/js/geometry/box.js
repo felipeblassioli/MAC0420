@@ -1,6 +1,8 @@
-var BoundingBox = function(bbox){
+var BoundingBox = function( model, bbox ){
 	Model.prototype.constructor.call( this );
-	
+
+	this.model = model;
+
 	console.log("BoundingBox.constructor!");
 	this.left = bbox.left;
 	this.right = bbox.right;
@@ -42,7 +44,7 @@ BoundingBox.prototype.render = function(gl, program, viewMatrix, projectionMatri
 	var projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
     
 
-	gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( this.getModelViewMatrix(viewMatrix) ) );
+	gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( this.model.getModelViewMatrix(viewMatrix) ) );
 	gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( projectionMatrix ) );
 
 	gl.drawArrays( gl.LINES, 0, this.wireframe.vertices.length );
