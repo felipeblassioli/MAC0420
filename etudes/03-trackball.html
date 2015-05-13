@@ -1,0 +1,32 @@
+http://yuehuou.info/lab/virtual_track_ball.html
+http://math.hws.edu/~sv6529/cs424/lab4/points.html
+
+/*
+    TransformedVector = TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector;
+    !!! BEWARE !!! This lines actually performs the scaling FIRST, and THEN the rotation, and THEN the translation. This is how matrix multiplication works.*/
+    /*translation*rotation*scale*/
+
+/*/ C++ : compute the matrix
+glm::mat4 MVPmatrix = projection * view * model; // Remember : inverted !
+*/
+
+	if(this.isSelected){
+		switch(app.renderer.cvtb._state){
+			case STATE.ROTATE:
+				this.modelMatrix = mat4(
+					vec4(1,0,0,0),
+					vec4(0,1,0,0),
+					vec4(0,0,1,0),
+					vec4(0,0,0,1)
+				);
+				var rotMatrix = app.renderer.cvtb.getRotationMatrix();
+				this.modelMatrix = mult(this.modelMatrix, rotMatrix);
+				break;
+			case STATE.TRANSLATE:
+				var m = app.renderer.cvtb.getTranslationMatrix();
+				this.modelMatrix = mult(this.modelMatrix, m);
+				break;
+			case STATE.SCALE:
+				break;
+		}
+	}
