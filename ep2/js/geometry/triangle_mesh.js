@@ -14,6 +14,13 @@ var TriangleMesh = function(vertices, normals, centroid, bbox){
 	console.log("centroid: "+centroid);
 	console.log("bbox.center: "+this.bbox.center);
 	console.log("bSphere.center: "+this.boundingSphere.center);
+
+	this.translationMatrix = mat4(
+		[1, 0, 0, -this.centroid[0]/2 ],
+		[0, 1, 0, -this.centroid[1]/2 ],
+		[0, 0, 1, -this.centroid[2]/2 ],
+		[0, 0, 0, 1 ]  
+	);
 }
 
 TriangleMesh.prototype = Object.create(Model.prototype);

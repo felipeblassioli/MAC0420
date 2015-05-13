@@ -59,6 +59,8 @@ Model.prototype.getModelViewMatrix = function(viewMatrix){
 }
 
 Model.prototype.translate = function( startW, endW, axis ){
+	this.selectedAxis = axis;
+
 	var pixel_diff;
 	var temp = mat4(
 		vec4(1,0,0,0),
@@ -93,7 +95,9 @@ Model.prototype.translate = function( startW, endW, axis ){
 	this.translationMatrix[_axis][3] += pixel_diff;
 }
 
-Model.prototype.rotate = function( startW, endW ){
+Model.prototype.rotate = function( startW, endW, axis ){
+	this.selectedAxis = axis;
+
 	var start = app.renderer.cvtb.getTrackBallVector( startW[0], startW[1] );
 	var end = app.renderer.cvtb.getTrackBallVector( endW[0], endW[1] );
 
@@ -119,7 +123,9 @@ Model.prototype.rotate = function( startW, endW ){
 }
 
 /*Model.prototype._toNDC = function( )*/
-Model.prototype.scale = function( startW, endW ){
+Model.prototype.scale = function( startW, endW, axis ){
+	this.selectedAxis = axis;
+
 	var ZOOM_SCALE = 1.0 / (12.0 * app.renderer.viewport.height);
 
 	var dx = startW[0] - endW[0];

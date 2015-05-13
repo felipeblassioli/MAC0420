@@ -214,6 +214,7 @@ var CanvasVTB = function(canvas) {
 	window.addEventListener( 'keyup', this.keyUpHandler(), false );
 
 	this._state = STATE.TRANSLATE;
+	this._axis = 0;
 };
 
 CanvasVTB.prototype = new VirtualTrackBall();
@@ -261,13 +262,13 @@ CanvasVTB.prototype.mouseMoveHandler = function() {
 			if(x && y){
 				switch(that._state){
 					case STATE.ROTATE:
-						app.renderer.activeObject.rotate( that.startW, that.endW );
+						app.renderer.activeObject.rotate( that.startW, that.endW, that._axis );
 						break;
 					case STATE.TRANSLATE:
-						app.renderer.activeObject.translate( that.startW, that.endW );
+						app.renderer.activeObject.translate( that.startW, that.endW, that._axis );
 						break;
 					case STATE.SCALE:
-						app.renderer.activeObject.scale( that.startW, that.endW );
+						app.renderer.activeObject.scale( that.startW, that.endW, that._axis );
 						break;
 				}
 				
@@ -283,7 +284,7 @@ CanvasVTB.prototype.keyDownHandler = function(){
 /*		if ( _this.enabled === false ) return;*/
 		//window.removeEventListener( 'keydown', keydown );
 		console.log("keyCode: "+event.keyCode);
-
+		var help = "";
 		switch( event.keyCode ){
 			case 9: // TAB
 				app.renderer.switchSelectedObject();
@@ -293,36 +294,42 @@ CanvasVTB.prototype.keyDownHandler = function(){
 				that._modifier = true;
 				break;
 			case 27: // ESC
-
+				help += "Aperte X para deletar o objeto selecionado. <br />";
+				help += "Aperte T para transladar o objeto selecionado. <br />";
+				help += "Aperte R para rotacionar o objeto selecionado. <br />";
+				help += "Aperte S para escalar o objeto selecionado. <br />";
 				break;
 			case 88: // x
-				if(this._state == STATE.TRANSLATE){
-
+				if(that._state == STATE.TRANSLATE ){
+					that._axis = 0;
+					help += "Eixo X selecionado.";
 				}else{
 					console.log("DELETE");
 					app.renderer.removeSelectedObject();
 				}
 				break;
 			case 89: // y
-				if(this._state == STATE.TRANSLATE){
-					
-				}
+				that._axis = 1;
+				help += "Eixo Y selecionado.";
 				break;
 			case 90: // z
-				console.log("DELETE");
-				app.renderer.removeSelectedObject();
+				that._axis = 2;
+				help += "Eixo Z selecionado.";
 				break;
 			case 84: // t
 				console.log("TRANSLATE");
 				that._state = STATE.TRANSLATE;
+				help += "Para selecionar um eixo pressiona x, y ou z.";
 				break;
 			case 82: // r
 				console.log("ROTATE");
 				that._state = STATE.ROTATE;
+				help += "Para selecionar um eixo pressiona x, y ou z.";
 				break;
 			case 83: // s
 				console.log("SCALE");
 				that._state = STATE.SCALE;
+				help += "Para selecionar um eixo pressiona x, y ou z.";
 				break;
 			case 61: // +
 				app.renderer.viewScaleZ -= 0.5;
@@ -333,16 +340,7 @@ CanvasVTB.prototype.keyDownHandler = function(){
 				app.renderer.render();
 				break;
 		}
-/*		_prevState = _state;
-		if ( _state !== STATE.NONE ) {
-			return;
-		} else if ( event.keyCode === _this.keys[ STATE.ROTATE ] && !_this.noRotate ) {
-			_state = STATE.ROTATE;
-		} else if ( event.keyCode === _this.keys[ STATE.ZOOM ] && !_this.noZoom ) {
-			_state = STATE.ZOOM;
-		} else if ( event.keyCode === _this.keys[ STATE.PAN ] && !_this.noPan ) {
-			_state = STATE.PAN;
-		}*/
+		app.showMessage(help);
 	};
 }
 
