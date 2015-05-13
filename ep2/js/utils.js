@@ -74,6 +74,28 @@ var Quaternion = function(x, y, z, w) {
   this.w = (w !== undefined) ? w : 1;
 };
 
+/*http://stackoverflow.com/questions/4436764/rotating-a-quaternion-on-1-axis
+Quaternion Quaternion::create_from_axis_angle(const double &xx, const double &yy, const double &zz, const double &a)
+{
+    // Here we calculate the sin( theta / 2) once for optimization
+    double result = sin( a / 2.0 );
+
+    // Calculate the x, y and z of the quaternion
+    double x = xx * result;
+    double y = yy * result;
+    double z = zz * result;
+
+    // Calcualte the w value by cos( theta / 2 )
+    double w = cos( a / 2.0 );
+
+    return Quaternion(x, y, z, w).normalize();
+}
+So to rotate around the x axis for example, 
+you could create a quaternion with createFromAxisAngle(1, 0, 0, M_PI/2) 
+and multiply it by the current rotation quaternion of your model
+
+*/
+
 Quaternion.prototype = {
   x : 0,
   y : 0,
@@ -105,13 +127,15 @@ Quaternion.prototype = {
 
   //reference: THREE.js
   makeRotationFromQuaternion : function() {
-    var x = this.x, y = this.y, z = this.z, w = this.w;
+    var x = this.x;
+    var y = this.y;
+    var z = this.z;
+    var w = this.w;
+
     var x2 = x + x, y2 = y + y, z2 = z + z;
     var xx = x * x2, xy = x * y2, xz = x * z2;
     var yy = y * y2, yz = y * z2, zz = z * z2;
     var wx = w * x2, wy = w * y2, wz = w * z2;
-
-    //var result = Matrix.I(4);
 
     result = mat4(
       vec4( 1 - (yy + zz), xy - wz, xz + wy, 0 ),

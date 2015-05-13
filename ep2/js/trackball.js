@@ -41,20 +41,6 @@ VirtualTrackBall.prototype = {
 		return v.nor();
 	},
 	
-	//convert it to Quaternion, and merger to the old one, convert to matrix and return
-	getRotationMatrix:function(){
-		var temp = mat4(
-			vec4(1,0,0,0),
-			vec4(0,1,0,0),
-			vec4(0,0,1,0),
-			vec4(0,0,0,1)
-		);
-		if(this.q===null || this.q===undefined){
-			return temp;
-		}
-		return this.q.makeRotationFromQuaternion();
-	},
-
 	min:function(x, y){
 		if(x>y){
 			return y;
