@@ -105,29 +105,7 @@ Model.prototype.translate = function( startW, endW, axis ){
 
 Model.prototype.rotate = function( startW, endW, axis ){
 	this.selectedAxis = axis;
-
-	var start = app.renderer.cvtb.getTrackBallVector( startW[0], startW[1] );
-	var end = app.renderer.cvtb.getTrackBallVector( endW[0], endW[1] );
-
-	var axis = end.clone().cross( start ).nor();
-	var dis = 0 - end.clone().sub( start ).len()*2;
-
-/*	console.log("Rotate from "+startW+" to "+endW);
-	console.log("\tRotate from "+start+" to "+end);*/
-	var curRP = new Quaternion();
-	curRP.fromAxisAngle(axis, dis);
-	this.q = curRP.multiply(this.q);
-
-	var temp = mat4(
-		vec4(1,0,0,0),
-		vec4(0,1,0,0),
-		vec4(0,0,1,0),
-		vec4(0,0,0,1)
-	);
-	if(this.q===null || this.q===undefined){
-		return temp;
-	}
-	this.rotationMatrix = this.q.makeRotationFromQuaternion();
+	this.rotationMatrix = app.renderer.cvtb.getRotationMatrix( this.q, startW, endW, axis );
 }
 
 /*Model.prototype._toNDC = function( )*/
