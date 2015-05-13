@@ -126,12 +126,13 @@ Model.prototype.rotate = function( startW, endW, axis ){
 Model.prototype.scale = function( startW, endW, axis ){
 	this.selectedAxis = axis;
 
+	var pixel_diff;
 	var ZOOM_SCALE = 1.0 / (12.0 * app.renderer.viewport.height);
 
 	var dx = startW[0] - endW[0];
 	var dy = startW[1] - endW[1];
 	//var pixel_diff = Math.sqrt( (dx*dx)/app.renderer.viewport.width + (dy*dy)/app.renderer.viewport.height );
-	var pixel_diff = dy;
+	
 	//console.log("pixel_diff="+pixel_diff);
 
 /*	http://web.cse.ohio-state.edu/~crawfis/Graphics/VirtualTrackball.html
@@ -140,8 +141,22 @@ Model.prototype.scale = function( startW, endW, axis ){
 	glScalef( zoom_factor, zoom_factor, zoom_factor );*/
 
 	//var s = 1.0 + pixel_diff * ZOOM_SCALE;
-	var s = pixel_diff * ZOOM_SCALE;
-	this.scaleMatrix[0][0] += s;
+	
+/*	this.scaleMatrix[0][0] += s;
 	this.scaleMatrix[1][1] += s;
-	this.scaleMatrix[2][2] += s;
+	this.scaleMatrix[2][2] += s;*/
+
+	switch(axis){
+		case 0:
+			pixel_diff = dx;
+			break;
+		case 1:
+			pixel_diff = dy;
+			break;
+		case 2:
+			pixel_diff = dy;
+			break;
+	}
+	var s = pixel_diff * ZOOM_SCALE;
+	this.scaleMatrix[axis][axis] += s;
 }

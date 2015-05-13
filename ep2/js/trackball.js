@@ -194,6 +194,7 @@ VirtualTrackBall.prototype = {
 };
 
 STATE = {
+	NONE: -1,
 	TRANSLATE: 0,
 	ROTATE: 1,
 	SCALE: 2
@@ -213,7 +214,7 @@ var CanvasVTB = function(canvas) {
 	window.addEventListener( 'keydown', this.keyDownHandler(), false );
 	window.addEventListener( 'keyup', this.keyUpHandler(), false );
 
-	this._state = STATE.TRANSLATE;
+	this._state = STATE.NONE;
 	this._axis = 0;
 };
 
@@ -298,14 +299,16 @@ CanvasVTB.prototype.keyDownHandler = function(){
 				help += "Aperte T para transladar o objeto selecionado. <br />";
 				help += "Aperte R para rotacionar o objeto selecionado. <br />";
 				help += "Aperte S para escalar o objeto selecionado. <br />";
+				that._state = STATE.NONE;
+				that._axis = -1;
 				break;
 			case 88: // x
-				if(that._state == STATE.TRANSLATE ){
-					that._axis = 0;
-					help += "Eixo X selecionado.";
-				}else{
+				if(that._state == STATE.NONE ){
 					console.log("DELETE");
 					app.renderer.removeSelectedObject();
+				}else{
+					that._axis = 0;
+					help += "Eixo X selecionado.";
 				}
 				break;
 			case 89: // y
