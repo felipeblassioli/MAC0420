@@ -111,8 +111,8 @@ BoundingBox.prototype.getCenter = function(){
 		(this.top[1] + this.bottom[1])/2.0,
 		(this.far[2] + this.near[2])/2.0
 	);*/
-	this.center = vec3( this.model.centroid[0], this.model.centroid[1], this.model.centroid[2] );
-	this.center = multv( this.model.getModelMatrix(), this.center );
+	this.center = this.model.centroid;
+	this.center = multv( this.model.modelMatrix, this.center );
 	return this.center;
 }
 
