@@ -62,6 +62,7 @@ CanvasVTB.prototype.mouseDownHandler = function() {
 		var y = event.clientY - rect.top;
 
 		that.startW = vec2( x, y );
+		app.renderer.unproject( x, y );
 	};
 };
 

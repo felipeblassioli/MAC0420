@@ -243,9 +243,20 @@ Renderer.prototype.unproject = function(viewport_x, viewport_y){
 	);
 	console.log("ray_clip: "+ray_clip);
 	/* Homogeneus Coordinates to Eye Coordinates */
-	//var ray_eye = 
+	var ray_eye = multv( inverse(this.getProjectionMatrix()),ray_clip );
+	ray_eye = vec4( ray_eye[0], ray_eye[1], -1.0, 0.0 );
 	//vec4 ray_eye = inverse (projection_matrix) * ray_clip;
 	//ray_eye = vec4 (ray_eye.xy, -1.0, 0.0);
+	console.log( "ray_eye: " + ray_eye );
+
+	var ray_wor = multv( inverse( this.getViewMatrix() ), ray_eye );
+	ray_wor = vec3( ray_wor[0], ray_wor[1], ray_wor[2] );
+	console.log( "ray_wor: " + ray_wor );
+
+	ray_wor = normalize( ray_wor );
+	console.log( "normalize(ray_wor): " + ray_wor );
+
+	return ray_wor;
 
 /*	vec3 ray_wor = (inverse (view_matrix) * ray_eye).xyz;
 	// don't forget to normalise the vector at some point
