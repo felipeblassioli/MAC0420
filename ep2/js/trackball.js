@@ -210,10 +210,6 @@ CanvasVTB.prototype.mouseDownHandler = function() {
 		var y = event.clientY - rect.top;
 
 		that.startW = vec2( x, y );
-		that.setRotationStart( x, y );
-/*		var x = event.pageX - that.canvas.offsetLeft;
-		var y = event.pageY - that.canvas.offsetTop;*/
-//		that.setRotationStart(x,y);
 	};
 };
 
