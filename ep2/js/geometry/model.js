@@ -115,7 +115,7 @@ Model.prototype.rotate = function( startW, endW, axis ){
 /*	console.log("Rotate from "+startW+" to "+endW);
 	console.log("\tRotate from "+start+" to "+end);*/
 	var curRP = new Quaternion();
-	curRP.setFromAxisAngle(axis, dis);
+	curRP.fromAxisAngle(axis, dis);
 	this.q = curRP.multiply(this.q);
 
 	var temp = mat4(
