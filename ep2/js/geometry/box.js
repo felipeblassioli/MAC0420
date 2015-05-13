@@ -46,7 +46,7 @@ BoundingBox.prototype.render = function(gl, program, viewMatrix, projectionMatri
 
 	gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( this.model.getModelViewMatrix(viewMatrix) ) );
 	gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( projectionMatrix ) );
-	gl.uniform4fv( gl.getUniformLocation(program, "fColor"), flatten( vec4( 1.0, 0.0, 0.0, 1.0 ) ) );
+	gl.uniform4fv( gl.getUniformLocation(program, "fColor"), flatten( vec4( 1.0, 1.0, 0.0, 1.0 ) ) );
 
 
 	gl.drawArrays( gl.LINES, 0, this.wireframe.vertices.length );
