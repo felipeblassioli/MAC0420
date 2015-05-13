@@ -261,42 +261,12 @@ var Camera = function( eye, at, up ){
 	this.at = at;
 	this.up = up;
 
-	this.viewMatrix = mat4(
-		vec4(1,0,0,0),
-		vec4(0,1,0,0),
-		vec4(0,0,1,0),
-		vec4(0,0,0,1)
-	);
-	this.scaleMatrix = mat4(
-		vec4(1,0,0,0),
-		vec4(0,1,0,0),
-		vec4(0,0,1,0),
-		vec4(0,0,0,1)
-	);
-	this.rotationMatrix = mat4(
-		vec4(1,0,0,0),
-		vec4(0,1,0,0),
-		vec4(0,0,1,0),
-		vec4(0,0,0,1)
-	);
-	this.translationMatrix = mat4(
-		vec4(1,0,0,0),
-		vec4(0,1,0,0),
-		vec4(0,0,1,0),
-		vec4(0,0,0,1)
-	);
-
 	this.q = new Quaternion();
 }
 
 Camera.prototype.constructor = Camera;
 Camera.prototype.getViewMatrix = function(){
-	this.viewMatrix = lookAt( this.eye, this.at, this.up );
-	this.viewMatrix = mult( this.scaleMatrix, this.viewMatrix );
-	this.viewMatrix = mult( this.rotationMatrix, this.viewMatrix );
-	this.viewMatrix = mult( this.translationMatrix, this.viewMatrix );
-
-	return this.viewMatrix;
+	return lookAt( this.eye, this.at, this.up );;
 }
 
 Camera.prototype.scale = function( startW, endW ){
@@ -339,5 +309,6 @@ Camera.prototype.rotate = function( startW, endW ){
 	if(this.q===null || this.q===undefined){
 		return temp;
 	}
-	this.rotationMatrix = this.q.makeRotationFromQuaternion();
+
+	this.eye = multv( this.q.makeRotationFromQuaternion(), this.eye );
 }
