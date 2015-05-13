@@ -46,10 +46,6 @@ and multiply it by the current rotation quaternion of your model
 */
 
 Quaternion.prototype = {
-  x : 0,
-  y : 0,
-  z : 0,
-  w : 0,
 
   fromAxisAngle : function(axis_normal_vector, angle) {
     var halfAngle = angle / 2; 
