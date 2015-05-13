@@ -30,13 +30,16 @@ VirtualTrackBall.prototype.getTrackBallVector = function(win_x, win_y){
 	console.log("width="+this.width+" ; height="+this.height);
 	console.log("x="+x+" ; y="+y);*/
 
-	var v = new Vector(x, y, z);
-	var len = v.len();
+	var v = vec3( x, y, z );
+	var len = length( x );
+
+/*	var v = new Vector(x, y, z);
+	var len = v.len();*/
 	len = (len<1.0) ? len : 1.0;
 	z = Math.sqrt(1-len*len);
-	v.z = z;
+	v[2] = z;
 	
-	return v.nor();
+	return normalize( v );
 }
 	
 VirtualTrackBall.prototype.min = function(x, y){
@@ -52,8 +55,10 @@ VirtualTrackBall.prototype.getRotationMatrix = function( q, startW, endW, _axis 
 	var start = this.getTrackBallVector( startW[0], startW[1] );
 	var end = this.getTrackBallVector( endW[0], endW[1] );
 
-	var axis = end.clone().cross( start ).nor();
-	var dis = 0 - end.clone().sub( start ).len()*2;
+	/*var axis = end.clone().cross( start ).nor();*/
+	var axis = normalize( cross( end, start ) ); 
+	/*var dis = 0 - end.clone().sub( start ).len()*2;*/
+	var dis = 0 - length( subtract( end, start ) ) * 2;
 
 	var curRP = new Quaternion();
 	curRP.fromAxisAngle(axis, dis);

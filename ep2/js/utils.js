@@ -16,57 +16,6 @@ function _makeFrustrum(fovY, aspectRatio, front, back){
     return _perspective(-width,width, -height, height, front, back);
 }
 
-var Vector = function(x, y, z) {
-
-  this.x = x || 0;
-  this.y = y || 0;
-  this.z = z || 0;
-};
-
-Vector.prototype = {
-
-  len : function() {
-    return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-  },
-
-  nor : function() {
-    var length = this.len();
-    if (length == 0) {
-      this.x = 0;
-      this.y = 0;
-      this.z = 0;
-    } else {
-      this.x = this.x / length;
-      this.y = this.y / length;
-      this.z = this.z / length;
-    }
-    return this;
-  },
-
-  clone : function() {
-    return new Vector(this.x, this.y, this.z);
-  },
-
-  cross : function(a) {
-    var x = this.x, y = this.y, z = this.z;
-    this.x = y * a.z - z * a.y;
-    this.y = z * a.x - x * a.z;
-    this.z = x * a.y - y * a.x;
-    return this;
-  },
-
-  sub : function(a) {
-    this.x = this.x-a.x;
-    this.y = this.y-a.y;
-    this.z = this.z-a.z;
-    return this;
-  },
-
-  toString: function(){
-    return "("+this.x+","+this.y+","+this.z+")";
-  }
-};
-
 var Quaternion = function(x, y, z, w) {
   this.x = x || 0;
   this.y = y || 0;
@@ -105,9 +54,9 @@ Quaternion.prototype = {
   fromAxisAngle : function(axis_normal_vector, angle) {
     var halfAngle = angle / 2; 
     var factor = Math.sin(halfAngle);
-    this.x = axis_normal_vector.x * factor;
-    this.y = axis_normal_vector.y * factor;
-    this.z = axis_normal_vector.z * factor;
+    this.x = axis_normal_vector[0] * factor;
+    this.y = axis_normal_vector[1] * factor;
+    this.z = axis_normal_vector[2] * factor;
     this.w = Math.cos(halfAngle);
     return this;
   },
@@ -147,4 +96,3 @@ Quaternion.prototype = {
     return result;
   },
 };
-
