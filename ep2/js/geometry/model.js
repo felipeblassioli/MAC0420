@@ -58,7 +58,8 @@ Model.prototype.getModelViewMatrix = function(viewMatrix){
 	return this.modelViewMatrix;
 }
 
-Model.prototype.translate = function( startW, endW ){
+Model.prototype.translate = function( startW, endW, axis ){
+	var pixel_diff;
 	var temp = mat4(
 		vec4(1,0,0,0),
 		vec4(0,1,0,0),
@@ -68,14 +69,28 @@ Model.prototype.translate = function( startW, endW ){
 	if(startW===null || endW===null){
 		return temp;
 	}
+
+	var _axis = axis || 0;
+	switch(_axis){
+		case 0:
+			pixel_diff = startW[0] - endW[0];
+			pixel_diff /= app.renderer.viewport.width;
+			break;
+		case 1:
+			pixel_diff = startW[1] - endW[1];
+			pixel_diff /= app.renderer.viewport.height;
+			break;
+		case 2:
+			pixel_diff = startW[1] - endW[1];
+			pixel_diff /= app.renderer.viewport.height;
+			break;
+	}
 	//console.log("Translate from "+startW+" to "+endW);
-	var pixel_diff = startW[0] - endW[0];
-	pixel_diff /= app.renderer.viewport.width;
-	console.log( "pixel_diff= "+ pixel_diff );
+
+	//console.log( "pixel_diff= "+ pixel_diff );
 	/*var t = length( sub( startW, endW ) );
 	console.log("t="+t);*/
-	if(pixel_diff)
-		this.translationMatrix[0][3] += pixel_diff;
+	this.translationMatrix[_axis][3] += pixel_diff;
 }
 
 Model.prototype.rotate = function( startW, endW ){
@@ -111,7 +126,7 @@ Model.prototype.scale = function( startW, endW ){
 	var dy = startW[1] - endW[1];
 	//var pixel_diff = Math.sqrt( (dx*dx)/app.renderer.viewport.width + (dy*dy)/app.renderer.viewport.height );
 	var pixel_diff = dy;
-	console.log("pixel_diff="+pixel_diff);
+	//console.log("pixel_diff="+pixel_diff);
 
 /*	http://web.cse.ohio-state.edu/~crawfis/Graphics/VirtualTrackball.html
 	pixel_diff = point.x - lastPoint.x;

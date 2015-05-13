@@ -46,6 +46,8 @@ BoundingBox.prototype.render = function(gl, program, viewMatrix, projectionMatri
 
 	gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten( this.model.getModelViewMatrix(viewMatrix) ) );
 	gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten( projectionMatrix ) );
+	gl.uniform4fv( gl.getUniformLocation(program, "fColor"), flatten( vec4( 1.0, 0.0, 0.0, 1.0 ) ) );
+
 
 	gl.drawArrays( gl.LINES, 0, this.wireframe.vertices.length );
 }
@@ -104,12 +106,13 @@ BoundingBox.prototype.intersect = function(ray){
 }
 
 BoundingBox.prototype.getCenter = function(){
-	this.center = vec3(
+	/*this.center = vec3(
 		(this.right[0] + this.left[0])/2.0,
 		(this.top[1] + this.bottom[1])/2.0,
 		(this.far[2] + this.near[2])/2.0
-	);
-	this.center = multv( this.modelViewMatrix, this.center );
+	);*/
+	this.center = vec3( this.model.centroid[0], this.model.centroid[1], this.model.centroid[2] );
+	this.center = multv( this.model.getModelMatrix(), this.center );
 	return this.center;
 }
 

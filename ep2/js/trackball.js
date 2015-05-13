@@ -261,9 +261,7 @@ CanvasVTB.prototype.mouseMoveHandler = function() {
 			if(x && y){
 				switch(that._state){
 					case STATE.ROTATE:
-						//that.rotateTo( x, y );
 						app.renderer.activeObject.rotate( that.startW, that.endW );
-						//that.start = end;
 						break;
 					case STATE.TRANSLATE:
 						app.renderer.activeObject.translate( that.startW, that.endW );
@@ -294,7 +292,23 @@ CanvasVTB.prototype.keyDownHandler = function(){
 				console.log("Shift pressed");
 				that._modifier = true;
 				break;
+			case 27: // ESC
+
+				break;
 			case 88: // x
+				if(this._state == STATE.TRANSLATE){
+
+				}else{
+					console.log("DELETE");
+					app.renderer.removeSelectedObject();
+				}
+				break;
+			case 89: // y
+				if(this._state == STATE.TRANSLATE){
+					
+				}
+				break;
+			case 90: // z
 				console.log("DELETE");
 				app.renderer.removeSelectedObject();
 				break;
