@@ -176,7 +176,14 @@ STATE = {
 	TRANSLATE: 0,
 	ROTATE: 1,
 	SCALE: 2
-}
+};
+
+MOUSE = {
+	NONE: -1,
+	LEFT_BUTTON: 1,
+	MIDDLE_BUTTON: 2,
+	RIGHT_BUTTON: 3
+};
 
 var CanvasVTB = function(canvas) {
 	this.canvas = canvas;
@@ -187,6 +194,8 @@ var CanvasVTB = function(canvas) {
 	this.canvas.addEventListener( "mousedown", this.mouseDownHandler(), false );
 	this.canvas.addEventListener( "mouseup", this.mouseUpHandler(), false );
 	this.canvas.addEventListener( "mousemove", this.mouseMoveHandler(), false);
+	this.canvas.addEventListener( 'contextmenu', function(e) { e.preventDefault(); }, false );
+
 	//this.canvas.addEventListener('mousewheel', this.mouseWheelHandler(), false );
 
 	window.addEventListener( 'keydown', this.keyDownHandler(), false );
@@ -194,6 +203,7 @@ var CanvasVTB = function(canvas) {
 
 	this._state = STATE.NONE;
 	this._axis = 0;
+	this._mouseButtonClicked = MOUSE.NONE;
 };
 
 CanvasVTB.prototype = new VirtualTrackBall();
@@ -204,6 +214,21 @@ CanvasVTB.prototype.mouseDownHandler = function() {
 	var that = this;
 	return function(event) {
 		that.mousedown = true;
+
+		 switch (event.which) {
+			case 1:
+				that._mouseButtonClicked = MOUSE.LEFT_BUTTON;
+				break;
+			case 2:
+				that._mouseButtonClicked = MOUSE.MIDDLE_BUTTON;
+				break;
+			case 3:
+				that._mouseButtonClicked = MOUSE.RIGHT_BUTTON;
+				break;
+			default:
+				that._mouseButtonClicked = MOUSE.NONE;
+		}
+
 		var rect = that.canvas.getBoundingClientRect();
 
 		var x = event.clientX - rect.left;
@@ -217,6 +242,7 @@ CanvasVTB.prototype.mouseUpHandler = function() {
 	var that = this;
 	return function(event) {
 		that.mousedown = false;
+		that._mouseButtonClicked = MOUSE.NONE;
 		//app.renderer.commit();
 	};
 };
@@ -224,6 +250,7 @@ CanvasVTB.prototype.mouseUpHandler = function() {
 CanvasVTB.prototype.mouseMoveHandler = function() {
 	var that = this;
 	return function(event) {
+
 		if (that.mousedown == true) {
 			var rect = that.canvas.getBoundingClientRect();
 			var x = event.clientX - rect.left;
@@ -236,6 +263,12 @@ CanvasVTB.prototype.mouseMoveHandler = function() {
 			//console.log("x="+x+" ; y="+y);
 			if(x && y){
 				switch(that._state){
+					case STATE.NONE:
+						if( that._mouseButtonClicked == MOUSE.LEFT_BUTTON )
+							app.renderer.activeCamera.rotate( that.startW, that.endW );
+						else if (that._mouseButtonClicked == MOUSE.RIGHT_BUTTON )
+							app.renderer.activeCamera.scale( that.startW, that.endW );
+						break;
 					case STATE.ROTATE:
 						app.renderer.activeObject.rotate( that.startW, that.endW, that._axis );
 						break;

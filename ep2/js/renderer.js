@@ -9,6 +9,12 @@ var Renderer = function(){
 	this.activeObject;
 
 	this.viewScaleZ = 0.0;
+
+	this.activeCamera = new Camera(
+		vec3( 0, 0, 4.0 ),
+		vec3( 0.0, 0.0, 0.0 ), 
+		vec3( 0.0, 1.0, 0.0 )
+	);
 }
 
 Renderer.prototype.init = function(canvas){
@@ -213,13 +219,7 @@ Renderer.prototype.getProjectionMatrix = function(){
 }
 
 Renderer.prototype.getViewMatrix = function(){
-	//var eye = vec3(1.25, 3.25, +5.5);// the position of your camera, in world space
-	var eye = vec3( 0, 0, +4.0 + this.viewScaleZ )
-	var at = vec3( 0.0, 0.0, 0.0 ); // where you want to look at, in world space
-	var up = vec3( 0.0, 1.0, 0.0 );  // probably glm::vec3(0,1,0), but (0,-1,0) would make you looking upside-down, which can be great too
-
-	var viewMatrix = lookAt(eye,at,up);
-
+	var viewMatrix = this.activeCamera.getViewMatrix();
 	return viewMatrix;
 }
 
@@ -254,4 +254,90 @@ Renderer.prototype.unproject = function(viewport_x, viewport_y){
 	//vec3 ray_wor = (inverse (view_matrix) * ray_eye).xyz; // don't forget to normalise the vector at some point ray_wor = normalise (ray_wor);
 /*
 This should balance the up-and-down, left-and-right, and forwards components for us. So, assuming our camera is looking directly along the -Z world axis, we should get [0,0,-1] when the mouse is in the centre of the screen, and less significant z values when the mouse moves around the screen. This will depend on the aspect ratio, and field-of-view defined in the view and projection matrices. We now have a ray that we can compare with surfaces in world space. */
+}
+
+var Camera = function( eye, at, up ){
+	this.eye = eye;
+	this.at = at;
+	this.up = up;
+
+	this.viewMatrix = mat4(
+		vec4(1,0,0,0),
+		vec4(0,1,0,0),
+		vec4(0,0,1,0),
+		vec4(0,0,0,1)
+	);
+	this.scaleMatrix = mat4(
+		vec4(1,0,0,0),
+		vec4(0,1,0,0),
+		vec4(0,0,1,0),
+		vec4(0,0,0,1)
+	);
+	this.rotationMatrix = mat4(
+		vec4(1,0,0,0),
+		vec4(0,1,0,0),
+		vec4(0,0,1,0),
+		vec4(0,0,0,1)
+	);
+	this.translationMatrix = mat4(
+		vec4(1,0,0,0),
+		vec4(0,1,0,0),
+		vec4(0,0,1,0),
+		vec4(0,0,0,1)
+	);
+
+	this.q = new Quaternion();
+}
+
+Camera.prototype.constructor = Camera;
+Camera.prototype.getViewMatrix = function(){
+	this.viewMatrix = lookAt( this.eye, this.at, this.up );
+	this.viewMatrix = mult( this.scaleMatrix, this.viewMatrix );
+	this.viewMatrix = mult( this.rotationMatrix, this.viewMatrix );
+	this.viewMatrix = mult( this.translationMatrix, this.viewMatrix );
+
+	return this.viewMatrix;
+}
+
+Camera.prototype.scale = function( startW, endW ){
+
+	var pixel_diff, ZOOM_SCALE;
+	var dx = startW[0] - endW[0];
+	var dy = startW[1] - endW[1];
+
+	pixel_diff = dy;
+	ZOOM_SCALE = 1.0 / (1.0 * app.renderer.viewport.height);
+
+	var s = pixel_diff * ZOOM_SCALE;
+
+/*	this.scaleMatrix[0][0] += s;
+	this.scaleMatrix[1][2] += s;
+	this.scaleMatrix[1][2] += s;*/
+	this.eye[2] += s;
+}
+
+Camera.prototype.rotate = function( startW, endW ){
+
+	var start = app.renderer.cvtb.getTrackBallVector( startW[0], startW[1] );
+	var end = app.renderer.cvtb.getTrackBallVector( endW[0], endW[1] );
+
+	var axis = end.clone().cross( start ).nor();
+	var dis = 0 - end.clone().sub( start ).len()*2;
+
+	console.log("Rotate from "+startW+" to "+endW);
+	console.log("\tRotate from "+start+" to "+end);
+	var curRP = new Quaternion();
+	curRP.setFromAxisAngle(axis, dis);
+	this.q = curRP.multiply(this.q);
+
+	var temp = mat4(
+		vec4(1,0,0,0),
+		vec4(0,1,0,0),
+		vec4(0,0,1,0),
+		vec4(0,0,0,1)
+	);
+	if(this.q===null || this.q===undefined){
+		return temp;
+	}
+	this.rotationMatrix = this.q.makeRotationFromQuaternion();
 }
