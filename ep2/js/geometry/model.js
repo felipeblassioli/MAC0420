@@ -127,7 +127,7 @@ Model.prototype.scale = function( startW, endW, axis ){
 	this.selectedAxis = axis;
 
 	var pixel_diff;
-	var ZOOM_SCALE = 1.0 / (12.0 * app.renderer.viewport.height);
+	var ZOOM_SCALE; 
 
 	var dx = startW[0] - endW[0];
 	var dy = startW[1] - endW[1];
@@ -145,18 +145,29 @@ Model.prototype.scale = function( startW, endW, axis ){
 /*	this.scaleMatrix[0][0] += s;
 	this.scaleMatrix[1][1] += s;
 	this.scaleMatrix[2][2] += s;*/
-
+	var s;
 	switch(axis){
+		case -1:
+			pixel_diff = dy;
+			ZOOM_SCALE = 1.0 / (12.0 * app.renderer.viewport.width);
+			s = pixel_diff * ZOOM_SCALE;
+			this.scaleMatrix[0][0] += s;
+			this.scaleMatrix[1][1] += s;
+			this.scaleMatrix[2][2] += s;
+			return;
 		case 0:
 			pixel_diff = dx;
+			ZOOM_SCALE = 1.0 / (12.0 * app.renderer.viewport.width);
 			break;
 		case 1:
 			pixel_diff = dy;
+			ZOOM_SCALE = 1.0 / (12.0 * app.renderer.viewport.height);
 			break;
 		case 2:
 			pixel_diff = dy;
+			ZOOM_SCALE = 1.0 / (12.0 * app.renderer.viewport.height);
 			break;
 	}
-	var s = pixel_diff * ZOOM_SCALE;
+	s = pixel_diff * ZOOM_SCALE;
 	this.scaleMatrix[axis][axis] += s;
 }

@@ -202,7 +202,7 @@ var CanvasVTB = function(canvas) {
 	window.addEventListener( 'keyup', this.keyUpHandler(), false );
 
 	this._state = STATE.NONE;
-	this._axis = 0;
+	this._axis = -1;
 	this._mouseButtonClicked = MOUSE.NONE;
 };
 
