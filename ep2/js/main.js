@@ -13,6 +13,9 @@ app.init = function(){
 	help += "Aperte T para transladar o objeto selecionado. <br />";
 	help += "Aperte R para rotacionar o objeto selecionado. <br />";
 	help += "Aperte S para escalar o objeto selecionado. <br />";
+	help += "Botao ESQUERDO do mouse para rotacionar a camera. <br />";
+	help += "Botao DIREITO do mouse para rotacionar a camera. <br />";
+
 	app.showMessage(help);
 }
 

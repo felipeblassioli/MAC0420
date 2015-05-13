@@ -306,6 +306,8 @@ CanvasVTB.prototype.keyDownHandler = function(){
 				help += "Aperte T para transladar o objeto selecionado. <br />";
 				help += "Aperte R para rotacionar o objeto selecionado. <br />";
 				help += "Aperte S para escalar o objeto selecionado. <br />";
+				help += "Botao ESQUERDO do mouse para rotacionar a camera. <br />";
+				help += "Botao DIREITO do mouse para rotacionar a camera. <br />";
 				that._state = STATE.NONE;
 				that._axis = -1;
 				break;
