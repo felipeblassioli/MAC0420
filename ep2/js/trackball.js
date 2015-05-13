@@ -269,6 +269,7 @@ CanvasVTB.prototype.mouseMoveHandler = function() {
 						app.renderer.activeObject.translate( that.startW, that.endW );
 						break;
 					case STATE.SCALE:
+						app.renderer.activeObject.scale( that.startW, that.endW );
 						break;
 				}
 				

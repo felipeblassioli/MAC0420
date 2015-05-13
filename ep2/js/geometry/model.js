@@ -44,8 +44,8 @@ Model.prototype.render = function(gl, program, viewMatrix, projectionMatrix){
 }
 
 Model.prototype.getModelMatrix = function(){
-	/* TranslationMatrix * RotationMatrix * ScaleMatrix */
-	/* Translation is LAST */
+	/* mvMatrix = TranslationMatrix * RotationMatrix * ScaleMatrix */
+	/* Translation is the LAST transformation applied */
 	this.modelMatrix = this.scaleMatrix;
 	this.modelMatrix = mult( this.rotationMatrix, this.modelMatrix );
 	this.modelMatrix = mult( this.translationMatrix, this.modelMatrix );
@@ -70,8 +70,6 @@ Model.prototype.translate = function( startW, endW ){
 	}
 	//console.log("Translate from "+startW+" to "+endW);
 	var pixel_diff = startW[0] - endW[0];
-
-	//pixel_diff = (2.0*pixel_diff)/width - 1.0;
 	pixel_diff /= app.renderer.viewport.width;
 	console.log( "pixel_diff= "+ pixel_diff );
 	/*var t = length( sub( startW, endW ) );
@@ -103,4 +101,26 @@ Model.prototype.rotate = function( startW, endW ){
 		return temp;
 	}
 	this.rotationMatrix = this.q.makeRotationFromQuaternion();
+}
+
+/*Model.prototype._toNDC = function( )*/
+Model.prototype.scale = function( startW, endW ){
+	var ZOOM_SCALE = 1.0 / (12.0 * app.renderer.viewport.height);
+
+	var dx = startW[0] - endW[0];
+	var dy = startW[1] - endW[1];
+	//var pixel_diff = Math.sqrt( (dx*dx)/app.renderer.viewport.width + (dy*dy)/app.renderer.viewport.height );
+	var pixel_diff = dy;
+	console.log("pixel_diff="+pixel_diff);
+
+/*	http://web.cse.ohio-state.edu/~crawfis/Graphics/VirtualTrackball.html
+	pixel_diff = point.x - lastPoint.x;
+	zoom_factor = 1.0 + pixel_diff * m_ZOOMSCALE;
+	glScalef( zoom_factor, zoom_factor, zoom_factor );*/
+
+	//var s = 1.0 + pixel_diff * ZOOM_SCALE;
+	var s = pixel_diff * ZOOM_SCALE;
+	this.scaleMatrix[0][0] += s;
+	this.scaleMatrix[1][1] += s;
+	this.scaleMatrix[2][2] += s;
 }
