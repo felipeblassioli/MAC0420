@@ -40,7 +40,7 @@ Renderer.prototype.loadObject = function(data){
 	this.activeObject = obj;
 	this.activeObject.select();
 
-	this.render();
+	//this.render();
 }
 
 Renderer.prototype.removeSelectedObject = function(){
@@ -50,7 +50,8 @@ Renderer.prototype.removeSelectedObject = function(){
 	console.log("Index to be removed: "+index);
 	this.loadedObjects.splice(index, 1);
 	this.switchSelectedObject();
-	this.render();
+
+	//this.render();
 }
 
 Renderer.prototype.switchSelectedObject = function(){
@@ -66,7 +67,7 @@ Renderer.prototype.switchSelectedObject = function(){
 		this.activeObject = null;
 	}
 
-	this.render();
+	//this.render();
 }
 
 Renderer.prototype.start = function(){
@@ -139,8 +140,6 @@ Renderer.prototype.activateProgram = function(program){
 
 Renderer.prototype.render = function(){
 	//console.log("Render!");
-	//this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-	this.resizeIfNeeded();
 	this.gl.clear( this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
 	var viewMatrix = this.getViewMatrix();
@@ -198,6 +197,7 @@ Here is a typical use of viewport: suppose you have an image to display and it h
 Renderer.prototype.tick = function(){
 	//console.log("tick: "+this.getName());
 	this.resizeIfNeeded();
+	//console.log("tick");
 	this.render();
 
 	if(this.is_drawing) {
@@ -293,9 +293,9 @@ Camera.prototype.rotate = function( startW, endW ){
 
 	var axis = end.clone().cross( start ).nor();
 	var dis = 0 - end.clone().sub( start ).len()*2;
-
+/*
 	console.log("Rotate from "+startW+" to "+endW);
-	console.log("\tRotate from "+start+" to "+end);
+	console.log("\tRotate from "+start+" to "+end);*/
 	var curRP = new Quaternion();
 	curRP.setFromAxisAngle(axis, dis);
 	this.q = curRP.multiply(this.q);

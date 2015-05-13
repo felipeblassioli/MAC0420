@@ -6,8 +6,7 @@ app.init = function(){
 	canvas = document.getElementById( "gl-canvas" );
 	app.UI.init();
 	app.renderer.init(canvas);
-	//app.renderer.start();
-
+	
 	var help = "";
 	help += "Aperte X para deletar o objeto selecionado. <br />";
 	help += "Aperte T para transladar o objeto selecionado. <br />";
@@ -17,6 +16,8 @@ app.init = function(){
 	help += "Botao DIREITO do mouse para rotacionar a camera. <br />";
 
 	app.showMessage(help);
+
+	app.renderer.start();
 }
 
 app.UI = {

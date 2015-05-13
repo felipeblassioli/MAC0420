@@ -72,7 +72,15 @@ Model.prototype.translate = function( startW, endW, axis ){
 		return temp;
 	}
 
-	var _axis = axis || 0;
+	var _axis;
+	if(axis){
+		_axis = axis;
+		if(_axis == -1)
+			_axis = 0;
+	} else{
+		_axis = 0;
+	}
+		
 	switch(_axis){
 		case 0:
 			pixel_diff = startW[0] - endW[0];

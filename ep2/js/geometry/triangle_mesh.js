@@ -7,7 +7,7 @@ var TriangleMesh = function(vertices, normals, centroid, bbox){
 
 	this.bbox = new BoundingBox( this, bbox );
 	this.boundingSphere = this.getBoundingSphere();
-	this.activeManipulator = new TranslationManipulator( this, this.boundingSphere.radius * 1.5 );
+	this.activeManipulator = new TranslationManipulator( this );
 	//this.activeManipulator = new TranslationManipulator(this.cent, this.boundingSphere.radius);
 	//this.activeManipulator = new RotationManipulator(this);
 

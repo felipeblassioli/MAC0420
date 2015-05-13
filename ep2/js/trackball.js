@@ -280,7 +280,7 @@ CanvasVTB.prototype.mouseMoveHandler = function() {
 						break;
 				}
 				
-				app.renderer.render();
+				//app.renderer.render();
 			}
 		}
 	};
@@ -345,11 +345,11 @@ CanvasVTB.prototype.keyDownHandler = function(){
 				break;
 			case 61: // +
 				app.renderer.viewScaleZ -= 0.5;
-				app.renderer.render();
+				//app.renderer.render();
 				break;
 			case 173: //-
 				app.renderer.viewScaleZ += 0.5;
-				app.renderer.render();
+				//app.renderer.render();
 				break;
 		}
 		app.showMessage(help);
