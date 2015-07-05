@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+        <title>MAC0420 - EP3 </title>
+
+        <script id="2d-vs" type="x-shader/x-vertex">
+        attribute vec2 vPosition;
+
+        void main(){
+            gl_Position = vec4(vPosition,0,1);
+            gl_PointSize = 5.0;
+        }
+        </script>
+
+        <script id="2d-fs" type="x-shader/x-fragment">
+        precision mediump float;
+        uniform vec4 fColor;
+
+        void main()
+        {
+            gl_FragColor = fColor;
+        }
+        </script>
+
+  </head>
+
+  <body>
+    <div>
+        <h3>Open Curves</h3>
+        k: <input type="text" id="txt_k1" value="3" /> <br />
+        Total segmentos na curva: <input type="text" id="txt_segments1" value="100" /> <br />
+        <button id="bt_clear1">clear</button> <br />
+        <canvas id="gl-canvas1" width="400" height="400" /></canvas>
+    </div>
+
+    <div>
+        <h3>Closed Curves</h3>
+        k: <input type="text" id="txt_k2" value="3" /> <br />
+        Total segmentos na curva: <input type="text" id="txt_segments2" value="100" /> <br />
+        <button id="bt_clear2">clear</button> <br />
+     <canvas id="gl-canvas2" width="400" height="400" /></canvas>
+    </div>
+
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="js/renderer.js"> </script>
+    <script type="text/javascript" src="js/curve_drawer.js"> </script>
+    <script type="text/javascript" src="js/main.js"></script>
+  </body>
+</html>
